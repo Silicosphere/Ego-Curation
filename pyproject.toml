@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ego-curation"
+version = "0.1.0"
+description = "Rank egocentric videos by V-JEPA prediction surprise"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "torchcodec",
+    "transformers",
+    "pandas",
+    "tqdm",
+    "numpy",
+]
+
+[project.scripts]
+ego-curation = "ego_curation.cli:main"
