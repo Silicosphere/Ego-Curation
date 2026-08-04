@@ -18,3 +18,4 @@ dependencies = [
 
 [project.scripts]
 ego-curation = "ego_curation.cli:main"
+ego-curation-extract = "ego_curation.extract:main"

@@ -1,11 +1,15 @@
 import gc
-import numpy as np
 import torch
 from torchcodec.decoders import VideoDecoder
 
 from ego_curation.config import SurpriseConfig
 from ego_curation.sampling import get_fps, sample_indices
 from ego_curation.model import encode, predict_target, TUBELET
+
+
+def aggregate(scores: list[float], agg: str) -> float:
+    """Collapse per-window scores into a single video-level score."""
+    return max(scores) if agg == "max" else sum(scores) / len(scores)
 
 
 @torch.no_grad()
@@ -67,4 +71,4 @@ def calc_surprise_streaming(model, processor, video_file, config: SurpriseConfig
 
     if config.return_curve:
         return scores, [s / fps for s in starts]
-    return max(scores) if config.agg == "max" else float(np.mean(scores))
+    return aggregate(scores, config.agg)

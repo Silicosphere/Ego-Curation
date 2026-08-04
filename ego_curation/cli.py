@@ -5,7 +5,7 @@ from tqdm.auto import tqdm
 import torch
 
 from ego_curation.config import SurpriseConfig
-from ego_curation.pipeline import calc_surprise_streaming
+from ego_curation.pipeline import aggregate, calc_surprise_streaming
 from ego_curation.model import load_jepa2
 
 
@@ -107,6 +107,12 @@ def _build_segments_df(
     return df
 
 
+def _save_ranking(results: list[dict], output: str) -> None:
+    pd.DataFrame(results).sort_values("surprise", ascending=False).to_csv(
+        output, index=False
+    )
+
+
 def main(args_list: list[str] | None = None) -> None:
     parser = build_parser()
     args = parser.parse_args(args_list)
@@ -145,7 +151,7 @@ def main(args_list: list[str] | None = None) -> None:
 
         if args.segments_dir:
             scores, starts = out
-            s = max(scores) if config.agg == "max" else sum(scores) / len(scores)
+            s = aggregate(scores, config.agg)
             segments_path = Path(args.segments_dir) / f"{Path(video_file).stem}_segments.csv"
             _build_segments_df(
                 video_file, scores, starts, config, args.top_segments
@@ -156,8 +162,7 @@ def main(args_list: list[str] | None = None) -> None:
             print(f"  \u2192 surprise = {s:.4f}")
 
         results.append({"video": video_file, "surprise": s})
-        df = pd.DataFrame(results).sort_values("surprise", ascending=False)
-        df.to_csv(args.output, index=False)
+        _save_ranking(results, args.output)
 
     print(f"\nDone! Video ranking saved to {args.output}")
     if args.segments_dir:
