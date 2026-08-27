@@ -91,7 +91,7 @@ def extract(
 
             subprocess.run(cmd, check=True, capture_output=True)
 
-        print(f"Extracted {len(df)} clips to {out_dir}")
+        print(f"Extracted {len(df)} clips to {csv_out_dir}")
 
 
 def main(args_list: list[str] | None = None) -> None:
