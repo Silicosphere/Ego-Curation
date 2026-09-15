@@ -4,7 +4,7 @@ import pandas as pd
 from tqdm.auto import tqdm
 import torch
 
-from ego_curation.config import SurpriseConfig
+from ego_curation.config import SurpriseConfig, VJEPA_MODELS, DEFAULT_MODEL_SIZE
 from ego_curation.pipeline import aggregate, calc_surprise_streaming
 from ego_curation.model import load_jepa2
 
@@ -17,9 +17,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("videos", nargs="+", help="Video file(s) to process")
 
     parser.add_argument(
-        "--model",
-        default="facebook/vjepa2-vitl-fpc64-256",
-        help="V-JEPA model name (default: %(default)s)",
+        "--model-size",
+        choices=list(VJEPA_MODELS.keys()),
+        default=DEFAULT_MODEL_SIZE,
+        help="V-JEPA 2.1 model size (default: %(default)s)",
     )
     parser.add_argument(
         "--output", "-o", default="results.csv", help="Output CSV path"
@@ -125,10 +126,11 @@ def main(args_list: list[str] | None = None) -> None:
         if args.device
         else (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
     )
+    model_name = VJEPA_MODELS[args.model_size]
     print(f"Device:  {device}")
-    print(f"Model:   {args.model}")
+    print(f"Model:   {model_name} ({args.model_size})")
 
-    model, processor = load_jepa2(args.model, device)
+    model, processor = load_jepa2(model_name, device)
 
     config = SurpriseConfig(
         context_frames=args.context_frames,

@@ -19,7 +19,14 @@ This pipeline consists of two main scripts:
 2. [extract.py](ego_curation/extract.py):
    Holds the segment extraction logic, using ffmpeg to slice the videos. It outputs a `clips` directory with a subdirectory for each video's extracted segments.
 
-We use the [V-JEPA 2](https://arxiv.org/abs/2506.09985) model as the base model for this pipeline to find the most surprising frames in a video. Specifically, we use the [facebook/vjepa2-vitl-fpc64-256](https://huggingface.co/facebook/vjepa2-vitl-fpc64-256) model (0.3 billion parameters), hosted on [Hugging Face](https://huggingface.co/).
+We use [V-JEPA 2.1](https://arxiv.org/abs/2506.09985) as the backbone for this pipeline to find the most surprising frames in a video. We use the community [HuggingFace ports](https://huggingface.co/collections/apiantonio/v-jepa-21-huggingface-ports) by `apiantonio`, which provide four model sizes selectable via `--model-size`:
+
+| Size       | HuggingFace ID                              | Parameters |
+|------------|---------------------------------------------|------------|
+| `base`     | `apiantonio/vjepa2.1-vit-base-384`         | 0.1B       |
+| `large` *(default)* | `apiantonio/vjepa2.1-vit-large-384` | 0.3B       |
+| `giant`    | `apiantonio/vjepa2.1-vit-giant-384`        | 1B         |
+| `gigantic` | `apiantonio/vjepa2.1-vit-gigantic-384`     | 2B         |
 
 ### Methodology
 
@@ -62,6 +69,7 @@ pip install -r requirements.txt
 ```bash
 python3 main.py \
   <YOUR DATASET PATH>/* \
+  --model-size large \
   --context-duration 4.0 \
   --target-duration 2.0 \
   --context-frames 64 \

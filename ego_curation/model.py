@@ -41,7 +41,7 @@ def predict_target(model, context_embeddings, n_target_tokens):
 
 def load_jepa2(model_name: str, device: torch.device):
     """Load a V-JEPA model + processor from HuggingFace Hub."""
-    model = AutoModel.from_pretrained(model_name).to(device)
-    processor = AutoVideoProcessor.from_pretrained(model_name)
+    model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(device)
+    processor = AutoVideoProcessor.from_pretrained(model_name, trust_remote_code=True)
     model.eval()
     return model, processor
