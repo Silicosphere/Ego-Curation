@@ -19,14 +19,14 @@ This pipeline consists of two main scripts:
 2. [extract.py](ego_curation/extract.py):
    Holds the segment extraction logic, using ffmpeg to slice the videos. It outputs a `clips` directory with a subdirectory for each video's extracted segments.
 
-We use [V-JEPA 2.1](https://arxiv.org/abs/2506.09985) as the backbone for this pipeline to find the most surprising frames in a video. We use the community [HuggingFace ports](https://huggingface.co/collections/apiantonio/v-jepa-21-huggingface-ports) by `apiantonio`, which provide four model sizes selectable via `--model-size`:
+We use [V-JEPA 2.1](https://arxiv.org/abs/2506.09985) as the backbone for this pipeline to find the most surprising frames in a video. We use the community [HuggingFace ports](https://huggingface.co/collections/apiantonio/v-jepa-21-huggingface-ports) by `apiantonio`, selectable via `--model-size`:
 
 | Size       | HuggingFace ID                              | Parameters |
 |------------|---------------------------------------------|------------|
-| `base`     | `apiantonio/vjepa2.1-vit-base-384`         | 0.1B       |
-| `large` *(default)* | `apiantonio/vjepa2.1-vit-large-384` | 0.3B       |
 | `giant`    | `apiantonio/vjepa2.1-vit-giant-384`        | 1B         |
-| `gigantic` | `apiantonio/vjepa2.1-vit-gigantic-384`     | 2B         |
+| `gigantic` *(default)* | `apiantonio/vjepa2.1-vit-gigantic-384` | 2B     |
+
+The `base` and `large` ports are deliberately **not** offered. They are distilled from ViT-G and set `pred_teacher_embed_dim = 1664`, meaning their predictor outputs features in the *teacher's* 1664-dim space rather than in their own 768/1024-dim encoder space. A prediction error computed between those two spaces is meaningless, and scoring them would require keeping the 2B teacher resident anyway. The `giant` and `gigantic` checkpoints set `pred_teacher_embed_dim = null`, so their predictor reproduces their own hierarchical encoder features and the comparison is self-consistent. `load_jepa2` verifies this at load time and refuses any checkpoint where the two widths disagree.
 
 ### Methodology
 
@@ -69,7 +69,7 @@ pip install -r requirements.txt
 ```bash
 python3 main.py \
   <YOUR DATASET PATH>/* \
-  --model-size large \
+  --model-size gigantic \
   --context-duration 4.0 \
   --target-duration 2.0 \
   --context-frames 64 \
