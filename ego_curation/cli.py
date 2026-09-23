@@ -4,9 +4,14 @@ import pandas as pd
 from tqdm.auto import tqdm
 import torch
 
-from ego_curation.config import SurpriseConfig, VJEPA_MODELS, DEFAULT_MODEL_SIZE
+from ego_curation.config import (
+    SurpriseConfig,
+    VJEPA_MODELS,
+    DEFAULT_MODEL_SIZE,
+    DEFAULT_SAMPLE_FPS,
+)
 from ego_curation.pipeline import aggregate, calc_surprise_streaming
-from ego_curation.model import load_jepa2
+from ego_curation.model import load_jepa2, TUBELET
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -26,28 +31,25 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", "-o", default="results.csv", help="Output CSV path"
     )
     parser.add_argument(
-        "--context-duration",
+        "--sample-fps",
         type=float,
-        default=2.0,
-        help="Context window in seconds (default: %(default)s)",
-    )
-    parser.add_argument(
-        "--target-duration",
-        type=float,
-        default=1.0,
-        help="Target window in seconds (default: %(default)s)",
+        default=DEFAULT_SAMPLE_FPS,
+        help="Frames per second sampled from the video, shared by context and "
+        "target (default: %(default)s, the V-JEPA 2.1 pretraining rate)",
     )
     parser.add_argument(
         "--context-frames",
         type=int,
         default=32,
-        help="Frames sampled from context window (default: %(default)s)",
+        help="Frames in the context clip; must be even. Context duration is "
+        "context-frames / sample-fps (default: %(default)s)",
     )
     parser.add_argument(
         "--target-frames",
         type=int,
         default=16,
-        help="Frames sampled from target window (default: %(default)s)",
+        help="Frames in the target clip; must be even. Target duration is "
+        "target-frames / sample-fps (default: %(default)s)",
     )
     parser.add_argument(
         "--stride-duration",
@@ -93,7 +95,7 @@ def _build_segments_df(
     config: SurpriseConfig,
     top_segments: int | None,
 ) -> pd.DataFrame:
-    window_duration = config.context_duration + config.target_duration
+    window_duration = config.window_duration
     df = pd.DataFrame(
         {
             "video": video_file,
@@ -120,26 +122,35 @@ def main(args_list: list[str] | None = None) -> None:
 
     if args.top_segments is not None and args.segments_dir is None:
         parser.error("--top-segments requires --segments-dir")
+    if args.sample_fps <= 0:
+        parser.error("--sample-fps must be positive")
+    for flag, n in (("--context-frames", args.context_frames),
+                    ("--target-frames", args.target_frames)):
+        if n <= 0 or n % TUBELET:
+            parser.error(f"{flag} must be a positive multiple of {TUBELET}")
+
+    config = SurpriseConfig(
+        context_frames=args.context_frames,
+        target_frames=args.target_frames,
+        sample_fps=args.sample_fps,
+        stride_duration=args.stride_duration,
+        agg=args.agg,
+        return_curve=args.segments_dir is not None,
+    )
 
     device = (
         torch.device(args.device)
         if args.device
         else (torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
     )
-    model_name = VJEPA_MODELS[args.model_size]
     print(f"Device:  {device}")
-    print(f"Model:   {model_name} ({args.model_size})")
+    print(f"Model:   V-JEPA 2.1 {args.model_size} "
+          f"({VJEPA_MODELS[args.model_size]['checkpoint']})")
+    print(f"Window:  {config.context_duration:g} s context + "
+          f"{config.target_duration:g} s target at {config.sample_fps:g} fps")
 
-    model, processor = load_jepa2(model_name, device)
-
-    config = SurpriseConfig(
-        context_frames=args.context_frames,
-        target_frames=args.target_frames,
-        context_duration=args.context_duration,
-        target_duration=args.target_duration,
-        stride_duration=args.stride_duration,
-        agg=args.agg,
-        return_curve=args.segments_dir is not None,
+    model, processor = load_jepa2(
+        args.model_size, device, num_frames=args.context_frames + args.target_frames
     )
 
     if args.segments_dir:

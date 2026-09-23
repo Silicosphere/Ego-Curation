@@ -1,6 +1,7 @@
-torch>=2.0
+torch>=2.1
 torchcodec
-transformers
+timm
+einops
 pandas
 tqdm
 numpy

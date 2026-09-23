@@ -19,21 +19,23 @@ This pipeline consists of two main scripts:
 2. [extract.py](ego_curation/extract.py):
    Holds the segment extraction logic, using ffmpeg to slice the videos. It outputs a `clips` directory with a subdirectory for each video's extracted segments.
 
-We use [V-JEPA 2.1](https://arxiv.org/abs/2506.09985) as the backbone for this pipeline to find the most surprising frames in a video. We use the community [HuggingFace ports](https://huggingface.co/collections/apiantonio/v-jepa-21-huggingface-ports) by `apiantonio`, selectable via `--model-size`:
+We use [V-JEPA 2.1](https://arxiv.org/abs/2603.14482) as the backbone for this pipeline to find the most surprising frames in a video. We use the **official release** from [facebookresearch/vjepa2](https://github.com/facebookresearch/vjepa2): the model code is loaded through `torch.hub` (pinned to a commit) and the released checkpoints are downloaded from `dl.fbaipublicfiles.com`. Select a size via `--model-size`:
 
-| Size       | HuggingFace ID                              | Parameters |
-|------------|---------------------------------------------|------------|
-| `giant`    | `apiantonio/vjepa2.1-vit-giant-384`        | 1B         |
-| `gigantic` *(default)* | `apiantonio/vjepa2.1-vit-gigantic-384` | 2B     |
+| Size       | Checkpoint                     | Parameters | Download size |
+|------------|--------------------------------|------------|---------------|
+| `giant`    | `vjepa2_1_vitg_384.pt`         | 1B         | 15.7 GB       |
+| `gigantic` *(default)* | `vjepa2_1_vitG_384.pt` | 2B     | 28.2 GB       |
 
-The `base` and `large` ports are deliberately **not** offered. They are distilled from ViT-G and set `pred_teacher_embed_dim = 1664`, meaning their predictor outputs features in the *teacher's* 1664-dim space rather than in their own 768/1024-dim encoder space. A prediction error computed between those two spaces is meaningless, and scoring them would require keeping the 2B teacher resident anyway. The `giant` and `gigantic` checkpoints set `pred_teacher_embed_dim = null`, so their predictor reproduces their own hierarchical encoder features and the comparison is self-consistent. `load_jepa2` verifies this at load time and refuses any checkpoint where the two widths disagree.
+Checkpoints are downloaded once on first use into the torch hub cache (`~/.cache/torch/hub/checkpoints`, override with `TORCH_HOME`). They include training optimizer state, hence their size; they are memory-mapped at load time so only the model weights are read into RAM.
+
+The `base` and `large` models are deliberately **not** offered. They are distilled from ViT-G, meaning their predictor outputs features in the *teacher's* 1664-dim space rather than in their own encoder space. A prediction error computed between those two spaces is meaningless, and scoring them would require keeping the 2B teacher resident anyway. The `giant` and `gigantic` checkpoints have no teacher, so their predictor reproduces their own hierarchical encoder features (5632 and 6656 dims) and the comparison is self-consistent. `load_jepa2` verifies this at load time and refuses any model where the two widths disagree. See [docs/vjepa21-representation-spaces.md](docs/vjepa21-representation-spaces.md).
 
 ### Methodology
 
-`pipeline.py` takes a list of video paths along with various arguments (e.g., `context-duration`, `target-duration`). The idea is:
+`pipeline.py` takes a list of video paths along with various arguments (e.g., `--sample-fps`, `--context-frames`, `--target-frames`). The idea is:
 
-1. Build a sliding window of size `context-duration + target-duration`.
-2. Randomly sample context frames and target frames from within the window.
+1. Slide a window over the video. The window holds `context-frames + target-frames` frames sampled at `sample-fps`.
+2. Split the sampled frames into a context clip (the first `context-frames`) and a target clip (the rest, which follows the context without a gap).
 3. Feed them to the model and obtain the predicted target embeddings.
 4. Compute the prediction error between the true target embeddings and the predicted ones, and save the scores.
 5. Write the top surprising windows (highest prediction error) to a CSV file in the `segments` directory.
@@ -70,20 +72,70 @@ pip install -r requirements.txt
 python3 main.py \
   <YOUR DATASET PATH>/* \
   --model-size gigantic \
-  --context-duration 4.0 \
-  --target-duration 2.0 \
-  --context-frames 64 \
-  --target-frames 16 \
+  --sample-fps 4 \
+  --context-frames 16 \
+  --target-frames 8 \
   --stride-duration 6.0 \
   --segments-dir segments \
   --top-segments 20
 ```
+
+This scores 6 s windows (4 s context + 2 s target) that tile the video without overlap. See [Choosing the parameters](#choosing-the-parameters) below.
 
 ### 4. Extract the top segments from the videos
 
 ```bash
 python3 -m ego_curation.extract segments/*.csv --top-segments 20 --output clips/
 ```
+
+## Choosing the parameters
+
+Three numbers define a window, and the durations follow from them:
+
+$$
+\text{context duration} = \frac{\texttt{context-frames}}{\texttt{sample-fps}}, \qquad
+\text{target duration} = \frac{\texttt{target-frames}}{\texttt{sample-fps}}
+$$
+
+Context and target always share one sampling rate. The predictor places the target right after the context and assumes the same time spacing, so a target sampled at a different rate would be compared against a prediction for the wrong span of time.
+
+The model groups every **2 frames** into one time step, and each time step is **576 tokens** (a 24 × 24 grid at 384 px). Compute and memory grow with the number of tokens.
+
+### Recommended order
+
+1. **`--sample-fps`: time resolution.**
+   - V-JEPA 2.1 was pretrained at **4 fps** (the default). Rates near it are the safest choice. Higher rates capture faster motion but need more frames to cover the same duration.
+   - Prefer a rate that divides the video's frame rate evenly, so sampled frames are equally spaced. For 30 fps video (Ego4D), 5, 6, 7.5, 10 and 15 fps give an exact step. 4 fps gives a step of 7.5 source frames, so gaps alternate between 7 and 8 frames.
+   - Do not exceed the video's own frame rate. The pipeline warns, because frames would be repeated.
+2. **`--context-frames`: how much history the model sees.**
+   - Must be even. Pick the context duration first, then set `context-frames = duration × sample-fps` (rounded to an even number).
+   - Pretraining used clips of 16 frames (4 s at 4 fps) and later 64 frames (16 s at 4 fps).
+   - Context tokens = `context-frames / 2 × 576`. For example, 16 frames is 4,608 tokens and 64 frames is 18,432 tokens.
+3. **`--target-frames`: how far ahead the model is scored.**
+   - Must be even. Same rule: `target-frames = duration × sample-fps`.
+   - Predictions far from the context are harder, so scores rise with target length regardless of content. Only compare scores produced with the same settings.
+   - The predictor processes context and target tokens together: `(context-frames + target-frames) / 2 × 576` tokens. This is usually what limits GPU memory.
+4. **`--stride-duration`: seconds between window starts.**
+   - Default: the window duration, so windows tile the video without overlap.
+   - A smaller stride gives overlapping windows. Surprising moments are located more precisely, but runtime grows in proportion (half the stride, twice the windows) and top segments can overlap each other.
+   - A larger stride skips part of the video.
+5. **`--top-segments`: segments kept per video.** Each segment is one window long, so the extracted footage per video is `top-segments × window duration`.
+6. **`--agg`: video-level score.** `mean` ranks videos by overall surprise; `max` ranks them by their single most surprising window.
+
+### Examples for 30 fps video (4 s context + 2 s target, 6 s stride)
+
+| Goal | `--sample-fps` | `--context-frames` | `--target-frames` | Predictor tokens |
+|---|---|---|---|---|
+| Match pretraining rate | 4 | 16 | 8 | 6,912 |
+| Equal frame spacing | 5 | 20 | 10 | 8,640 |
+| Finer motion | 15 | 60 | 30 | 25,920 |
+
+### Checklist
+
+- Both frame counts are even (the CLI rejects odd values).
+- `sample-fps` is at most the video's frame rate.
+- `(context-frames + target-frames) / 2 × 576` tokens fit in GPU memory. If a run runs out of memory, lower `sample-fps` or shorten the durations.
+- Runs you want to compare use the same `sample-fps`, frame counts and stride.
 
 ## Expected Output
 

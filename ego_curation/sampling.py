@@ -15,17 +15,12 @@ def get_fps(vr: VideoDecoder) -> float:
     return 30.0
 
 
-def sample_indices(start: int, end: int, n: int) -> np.ndarray:
-    """Uniformly sample *n* frame indices from [start, end).
+def sample_indices(start: int, n: int, step: float, num_frames: int) -> np.ndarray:
+    """Return *n* frame indices starting at *start*, *step* source frames apart.
 
-    Handles edge cases where the span has fewer than *n* frames
-    (pads by repeating the last available frame).
+    *step* is ``source_fps / sample_fps`` and may be fractional; indices are
+    rounded to the nearest frame. Indices past the end of the video repeat the
+    last frame.
     """
-    available = end - start
-    if available <= 0:
-        return np.array([max(0, start)] * n)
-    if available <= n:
-        idx = np.arange(start, end)
-        pad = np.full(n - available, end - 1)
-        return np.concatenate([idx, pad])
-    return np.linspace(start, end - 1, n, dtype=int)
+    idx = start + (np.arange(n) * step + 0.5).astype(int)
+    return np.minimum(idx, num_frames - 1)

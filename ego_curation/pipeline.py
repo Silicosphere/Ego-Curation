@@ -1,4 +1,5 @@
 import gc
+import warnings
 import torch
 from torchcodec.decoders import VideoDecoder
 
@@ -21,9 +22,16 @@ def calc_surprise_streaming(model, processor, video_file, config: SurpriseConfig
     fps = get_fps(vr)
     model_device = next(model.parameters()).device
 
-    ctx_frame_count = int(round(config.context_duration * fps))
-    tgt_frame_count = int(round(config.target_duration * fps))
-    window = ctx_frame_count + tgt_frame_count
+    # Context and target are one continuous sampling grid: the target's first
+    # frame is exactly one step after the context's last frame.
+    step = fps / config.sample_fps
+    if step < 1:
+        warnings.warn(
+            f"{video_file}: sample rate {config.sample_fps} fps exceeds the "
+            f"video's {fps:.2f} fps; frames will be repeated"
+        )
+    n_total = config.context_frames + config.target_frames
+    window = max(1, int(round(n_total * step)))
 
     if config.stride_duration is None:
         stride = window
@@ -31,29 +39,17 @@ def calc_surprise_streaming(model, processor, video_file, config: SurpriseConfig
         stride = max(1, int(round(config.stride_duration * fps)))
 
     starts = list(range(0, max(1, num_frames - window + 1), stride))
-    if not starts:
-        starts = [0]
 
     scores = []
-    for idx, s in enumerate(starts):
-        ctx_end = min(s + ctx_frame_count, num_frames)
-        tgt_end = min(ctx_end + tgt_frame_count, num_frames)
+    for s in starts:
+        idx = sample_indices(s, n_total, step, num_frames)
+        frames = vr.get_frames_at(indices=idx.tolist()).data
+        ctx_frames = frames[: config.context_frames]
+        tgt_frames = frames[config.context_frames :]
 
-        ctx_idx = sample_indices(s, ctx_end, config.context_frames)
-        tgt_idx = sample_indices(ctx_end, tgt_end, config.target_frames)
-
-        ctx_frames = vr.get_frames_at(indices=ctx_idx).data
-        tgt_frames = vr.get_frames_at(indices=tgt_idx).data
-
-        ctx_proc = (
-            processor(ctx_frames, return_tensors="pt")["pixel_values_videos"]
-            .to(model_device)
-        )
-        tgt_proc = (
-            processor(tgt_frames, return_tensors="pt")["pixel_values_videos"]
-            .to(model_device)
-        )
-        del ctx_frames, tgt_frames
+        ctx_proc = processor(ctx_frames).to(model_device)
+        tgt_proc = processor(tgt_frames).to(model_device)
+        del ctx_frames, tgt_frames, frames
 
         ctx_emb = encode(model, ctx_proc)
         tgt_emb_true = encode(model, tgt_proc)

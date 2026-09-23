@@ -8,9 +8,10 @@ version = "0.1.0"
 description = "Rank egocentric videos by V-JEPA prediction surprise"
 requires-python = ">=3.10"
 dependencies = [
-    "torch>=2.0",
+    "torch>=2.1",
     "torchcodec",
-    "transformers",
+    "timm",
+    "einops",
     "pandas",
     "tqdm",
     "numpy",
