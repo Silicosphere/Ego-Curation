@@ -82,6 +82,32 @@ python3 main.py \
 
 This scores 6 s windows (4 s context + 2 s target) that tile the video without overlap. See [Choosing the parameters](#choosing-the-parameters) below.
 
+#### Running on the cluster (Slurm)
+
+The pipeline runs on the GPU cluster. A run takes a long time, so start it inside `tmux`: the job keeps running if your SSH connection drops.
+
+1. On the login node, start a `tmux` session:
+
+   ```bash
+   tmux new -s ego
+   ```
+
+2. Inside `tmux`, start an interactive GPU job. **Always request memory:** the cluster default is 1 CPU and 2000 MB RAM, and a run that exceeds it is silently `Killed`.
+
+   ```bash
+   srun --gres=gpu:rtx5090 --cpus-per-task=8 --mem=32G --time=12:00:00 --pty bash
+   ```
+
+3. On the GPU node, run the pipeline script from the repository root:
+
+   ```bash
+   ./run.sh
+   ```
+
+   [run.sh](run.sh) loads the FFmpeg module that `torchcodec` needs (`module load FFmpeg/7.0.2-GCCcore-13.3.0`), exports `TORCH_HOME` so the checkpoints are stored under `/data` rather than your home directory, activates the virtual environment and calls `main.py`.
+
+To leave the run in the background, detach with `Ctrl-b` then `d`. Reattach later with `tmux attach -t ego`.
+
 ### 4. Extract the top segments from the videos
 
 ```bash
