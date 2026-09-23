@@ -93,19 +93,23 @@ def predict_target(model, context_embeddings, n_target_tokens):
     return pred
 
 
-def build_jepa2(hub_entry: str, num_frames: int = PRETRAINED_FRAMES):
+def build_jepa2(hub_entry: str, num_frames: int = PRETRAINED_FRAMES, device="cpu"):
     """Instantiate the official V-JEPA 2.1 encoder + predictor (random weights).
 
     `pretrained=False` because the upstream hub entrypoints point at a localhost
     test URL; the released weights are loaded by `load_jepa2` instead.
+
+    Parameters are allocated directly on `device`, so building on a GPU never
+    holds the float32 model in host RAM.
     """
-    encoder, predictor = torch.hub.load(
-        VJEPA_HUB_REPO,
-        hub_entry,
-        pretrained=False,
-        num_frames=max(num_frames, PRETRAINED_FRAMES),
-        trust_repo=True,
-    )
+    with torch.device(device):
+        encoder, predictor = torch.hub.load(
+            VJEPA_HUB_REPO,
+            hub_entry,
+            pretrained=False,
+            num_frames=max(num_frames, PRETRAINED_FRAMES),
+            trust_repo=True,
+        )
     encoder.return_hierarchical = True
     return torch.nn.ModuleDict({"encoder": encoder, "predictor": predictor})
 
@@ -152,12 +156,13 @@ def load_jepa2(model_size: str, device: torch.device, num_frames: int = PRETRAIN
     trained to match.
     """
     spec = VJEPA_MODELS[model_size]
-    model = build_jepa2(spec["hub_entry"], num_frames)
+    model = build_jepa2(spec["hub_entry"], num_frames, device)
     check_comparable(model, spec["hub_entry"])
     model.half()
 
     # mmap: the files also hold optimizer state (15.7 / 28.2 GB), so only the
-    # tensors actually copied into the model are read into memory.
+    # tensors actually copied into the model are read, and they are copied
+    # straight into the (already on-device) parameters.
     state = torch.load(
         _checkpoint_path(spec["checkpoint"]),
         map_location="cpu",
@@ -168,4 +173,4 @@ def load_jepa2(model_size: str, device: torch.device, num_frames: int = PRETRAIN
     model.predictor.load_state_dict(_clean_backbone_key(state["predictor"]))
     del state
 
-    return model.to(device).eval(), preprocess
+    return model.eval(), preprocess
