@@ -29,6 +29,9 @@ def preprocess(frames: torch.Tensor) -> torch.Tensor:
     Mirrors the official eval transform
     (evals/video_classification_frozen/utils.py): short-side resize to
     crop * 256 / 224, center crop, ImageNet normalisation.
+
+    Runs on the device of `frames`; pass uint8 frames already on the GPU to
+    keep the full-resolution float copy out of host RAM.
     """
     x = frames.float().div(255)
     h, w = x.shape[-2:]
@@ -43,7 +46,7 @@ def preprocess(frames: torch.Tensor) -> torch.Tensor:
     top = (x.shape[-2] - CROP_SIZE) // 2
     left = (x.shape[-1] - CROP_SIZE) // 2
     x = x[..., top : top + CROP_SIZE, left : left + CROP_SIZE]
-    x = (x - _MEAN) / _STD
+    x = (x - _MEAN.to(x.device)) / _STD.to(x.device)
     return x.permute(1, 0, 2, 3).unsqueeze(0)
 
 

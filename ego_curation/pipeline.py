@@ -47,8 +47,8 @@ def calc_surprise_streaming(model, processor, video_file, config: SurpriseConfig
         ctx_frames = frames[: config.context_frames]
         tgt_frames = frames[config.context_frames :]
 
-        ctx_proc = processor(ctx_frames).to(model_device)
-        tgt_proc = processor(tgt_frames).to(model_device)
+        ctx_proc = processor(ctx_frames.to(model_device))
+        tgt_proc = processor(tgt_frames.to(model_device))
         del ctx_frames, tgt_frames, frames
 
         ctx_emb = encode(model, ctx_proc)
