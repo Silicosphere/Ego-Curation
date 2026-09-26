@@ -12,12 +12,13 @@
 #SBATCH --nodes=6
 #SBATCH --ntasks=6                # one task per node
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=2         # pipeline is ~single-threaded (0.97 cores measured)
+#SBATCH --cpus-per-task=4         # pipeline is ~single-threaded (0.97 cores measured)
 #SBATCH --gres=gpu:1              # 1 GPU per node; --exclude below enforces >=16 GiB
 #SBATCH --mem=20G                 # 15.6 GiB peak RSS + 20% headroom (per node)
 #SBATCH --time=48:00:00
 #SBATCH --exclude=gpu-03,gpu-08   # these are the only nodes with <16 GiB GPUs
 #SBATCH --output=ego4d-allfolds-%j.out
+#SBATCH --error=ego4d-allfolds-%j.err
 
 set -euo pipefail
 
@@ -80,3 +81,4 @@ echo "=== all folds done: $(date -Iseconds) ==="
 echo ""
 echo "Measure actual usage (run this after the job):"
 echo "  sacct -j $SLURM_JOB_ID --format=JobID,JobName,Elapsed,MaxRSS,AveCPU,AllocCPUS,State"
+
