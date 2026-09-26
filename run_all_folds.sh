@@ -2,22 +2,19 @@
 #
 # PARALLEL RUN — 6 folds on 6 nodes simultaneously.
 #
-# ┌──────────────────────────────────────────────────────────────────────────┐
-# │ TODO: fill in --mem and --cpus-per-task after the profiling run.         │
-# │ Run profile_fold.sh first, then:                                         │
-# │   sacct -j <JOBID> --format=JobID,JobName,Elapsed,MaxRSS,AveCPU,State   │
-# │ and set --mem to (MaxRSS + ~20% headroom) and --cpus-per-task to what   │
-# │ AveCPU saturated at.                                                     │
-# └──────────────────────────────────────────────────────────────────────────┘
+# Measured from profiling job 1109 (fold 1, 2-hour run):
+#   MaxRSS = 15.6 GiB  → --mem=20G (15.6 GiB + 20% headroom)
+#   AveCPU = 01:56:38 over 12 CPUs → ~0.97 effective cores → --cpus-per-task=2
+#   Elapsed = 2:00:23 (TIMEOUT) → fold 1 did not finish in 2 h; 48 h is correct
 #
 #SBATCH --job-name=ego4d-allfolds
 #SBATCH --partition=gpu
 #SBATCH --nodes=6
 #SBATCH --ntasks=6                # one task per node
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=12        # TODO: tune after profiling
+#SBATCH --cpus-per-task=2         # pipeline is ~single-threaded (0.97 cores measured)
 #SBATCH --gres=gpu:1              # 1 GPU per node; --exclude below enforces >=16 GiB
-#SBATCH --mem=28G                 # TODO: tune after profiling (applied per node)
+#SBATCH --mem=20G                 # 15.6 GiB peak RSS + 20% headroom (per node)
 #SBATCH --time=48:00:00
 #SBATCH --exclude=gpu-03,gpu-08   # these are the only nodes with <16 GiB GPUs
 #SBATCH --output=ego4d-allfolds-%j.out
