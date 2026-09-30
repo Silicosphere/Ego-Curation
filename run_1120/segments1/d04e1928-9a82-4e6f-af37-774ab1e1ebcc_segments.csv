@@ -1,0 +1,16 @@
+rank,video,start_sec,end_sec,surprise
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,48.0,54.0,0.6986883878707886
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,0.0,6.0,0.6874536275863647
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,84.0,90.0,0.6872143745422363
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,36.0,42.0,0.6847689151763916
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,42.0,48.0,0.6844679713249207
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,24.0,30.0,0.6792272925376892
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,78.0,84.0,0.6775791645050049
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,30.0,36.0,0.6742832660675049
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,18.0,24.0,0.662578284740448
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,60.0,66.0,0.6596627235412598
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,72.0,78.0,0.6417771577835083
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,12.0,18.0,0.6359609961509705
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,6.0,12.0,0.6312347650527954
+14,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,54.0,60.0,0.6289072036743164
+15,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/d04e1928-9a82-4e6f-af37-774ab1e1ebcc.mp4,66.0,72.0,0.6177986860275269

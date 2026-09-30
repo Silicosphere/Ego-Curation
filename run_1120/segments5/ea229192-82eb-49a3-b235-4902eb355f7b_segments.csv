@@ -1,0 +1,16 @@
+rank,video,start_sec,end_sec,surprise
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,6.0,12.0,0.7142108678817749
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,54.0,60.0,0.6896081566810608
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,84.0,90.0,0.6870369911193848
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,72.0,78.0,0.6869847178459167
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,66.0,72.0,0.6850373148918152
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,36.0,42.0,0.6843472719192505
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,30.0,36.0,0.6814043521881104
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,78.0,84.0,0.6780861020088196
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,24.0,30.0,0.6760854125022888
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,60.0,66.0,0.6749317049980164
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,12.0,18.0,0.671812117099762
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,0.0,6.0,0.6704255938529968
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,18.0,24.0,0.6633193492889404
+14,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,42.0,48.0,0.6430861949920654
+15,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/ea229192-82eb-49a3-b235-4902eb355f7b.mp4,48.0,54.0,0.6363560557365417

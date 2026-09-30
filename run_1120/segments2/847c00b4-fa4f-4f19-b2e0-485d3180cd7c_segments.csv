@@ -1,0 +1,16 @@
+rank,video,start_sec,end_sec,surprise
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,84.0,90.0,0.624477744102478
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,0.0,6.0,0.6188384890556335
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,48.0,54.0,0.6176333427429199
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,66.0,72.0,0.6154922842979431
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,60.0,66.0,0.6122305989265442
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,54.0,60.0,0.6101124286651611
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,42.0,48.0,0.6056724190711975
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,12.0,18.0,0.5995798707008362
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,24.0,30.0,0.5983209609985352
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,78.0,84.0,0.5974575281143188
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,6.0,12.0,0.5911697745323181
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,72.0,78.0,0.5858336091041565
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,18.0,24.0,0.5712953209877014
+14,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,36.0,42.0,0.5711690187454224
+15,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold2/847c00b4-fa4f-4f19-b2e0-485d3180cd7c.mp4,30.0,36.0,0.5711281299591064

@@ -1,0 +1,16 @@
+rank,video,start_sec,end_sec,surprise
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,66.0,72.0,0.6292040348052979
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,18.0,24.0,0.6247870326042175
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,24.0,30.0,0.6034039855003357
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,6.0,12.0,0.5975643396377563
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,48.0,54.0,0.5858281850814819
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,12.0,18.0,0.5807540416717529
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,0.0,6.0,0.5756889581680298
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,42.0,48.0,0.5749571919441223
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,54.0,60.0,0.5703125
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,60.0,66.0,0.5700185894966125
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,78.0,84.0,0.5691652894020081
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,36.0,42.0,0.5690202713012695
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,72.0,78.0,0.5684890747070312
+14,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,84.0,90.0,0.5683413147926331
+15,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/3ef71673-7e7b-4a24-a5f7-a4e291a07601.mp4,30.0,36.0,0.5634889602661133

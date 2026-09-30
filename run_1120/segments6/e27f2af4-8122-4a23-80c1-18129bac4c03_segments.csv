@@ -1,0 +1,14 @@
+rank,video,start_sec,end_sec,surprise
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,48.0,54.0,0.6846084594726562
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,60.0,66.0,0.6833574175834656
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,54.0,60.0,0.6712052822113037
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,12.0,18.0,0.6694739460945129
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,0.0,6.0,0.6599786877632141
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,24.0,30.0,0.6549201011657715
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,6.0,12.0,0.6500275135040283
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,42.0,48.0,0.6484586000442505
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,30.0,36.0,0.6466869115829468
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,66.0,72.0,0.6389086246490479
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,36.0,42.0,0.6348951458930969
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,18.0,24.0,0.6204113960266113
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/e27f2af4-8122-4a23-80c1-18129bac4c03.mp4,72.0,78.0,0.5967816710472107

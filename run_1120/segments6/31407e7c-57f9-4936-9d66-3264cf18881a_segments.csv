@@ -1,0 +1,8 @@
+rank,video,start_sec,end_sec,surprise
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/31407e7c-57f9-4936-9d66-3264cf18881a.mp4,6.0,12.0,0.6962963342666626
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/31407e7c-57f9-4936-9d66-3264cf18881a.mp4,0.0,6.0,0.6832112073898315
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/31407e7c-57f9-4936-9d66-3264cf18881a.mp4,12.0,18.0,0.6701530814170837
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/31407e7c-57f9-4936-9d66-3264cf18881a.mp4,18.0,24.0,0.6698004007339478
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/31407e7c-57f9-4936-9d66-3264cf18881a.mp4,30.0,36.0,0.661037027835846
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/31407e7c-57f9-4936-9d66-3264cf18881a.mp4,36.0,42.0,0.6573410034179688
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/31407e7c-57f9-4936-9d66-3264cf18881a.mp4,24.0,30.0,0.6490215063095093
