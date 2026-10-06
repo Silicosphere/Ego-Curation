@@ -317,14 +317,19 @@ def _auroc(imp, pos):
 
 
 def _load_curves(path, L):
-    """Per-window metric curves, the flat copy-error maps and window start times."""
+    """Per-window metric curves, flat and spatial ([W, g*g]) copy-error maps, start times."""
     with np.load(path) as z:
         v = {k: z[k].astype(np.float32) for k in ("err_pred", "err_copy", "cos", "start_sec")}
     W = len(v["start_sec"])
     m = _window_metrics(v, L)
     m["copy error (motion)"] = v["err_copy"].reshape(W, -1).mean(1)
     m["pred - copy"] = m["mean (current)"] - m["copy error (motion)"]
-    return m, v["err_copy"].reshape(W, -1), v["start_sec"]
+    ec = v["err_copy"]
+    return m, ec.reshape(W, -1), ec.mean((1, 4)).reshape(W, -1), v["start_sec"]
+
+
+def _map_dist(a, b, sl):
+    return float(np.abs(a[sl] - b[sl]).mean())
 
 
 def pairs(args) -> None:
@@ -350,7 +355,9 @@ def pairs(args) -> None:
         if not all(x.exists() for x in paths.values()):
             missing += 1
             continue
-        (mp, cp, sp), (mi, ci, _) = (_load_curves(paths[k], L) for k in ("possible", "impossible"))
+        (mp, cp, xp, sp), (mi, ci, xi, _) = (
+            _load_curves(paths[k], L) for k in ("possible", "impossible")
+        )
         W = min(len(cp), len(ci))
         # The two videos share the scene, so their copy-error maps match until the
         # event enters a target; the first window past half the peak marks the onset.
@@ -361,6 +368,7 @@ def pairs(args) -> None:
             "onset": onset, "onset_sec": float(sp[onset]) + ctx_sec, "div": div,
             "p": {k: x[:W] for k, x in mp.items()},
             "i": {k: x[:W] for k, x in mi.items()},
+            "xp": xp[:W], "xi": xi[:W],
         })
     if not recs:
         raise SystemExit(f"no complete pairs with dumps in {out_dir}")
@@ -435,6 +443,39 @@ def pairs(args) -> None:
           f"{row.get('Camera', '?')[:7]:<7} {row.get('Difficulty', '?')[:7]:<7} {r['W']:>3} "
           f"{r['onset_sec']:7.1f} {r['p']['mean (current)'].max():9.4f} "
           f"{r['i']['mean (current)'].max():9.4f} {d_cur:+8.4f} {d_pc:+8.4f}")
+
+    by_scene = {}
+    for r in recs:
+        by_scene.setdefault(r["scene"], {})[r["prefix"]] = r
+    quads = [(s, q["1"], q["2"]) for s, q in sorted(by_scene.items()) if {"1", "2"} <= set(q)]
+    if quads:
+        nq = len(quads)
+        p(f"\n[6] Quadruplet (relative) accuracy over {nq} scenes: share with I1 + I2 > P1 + P2")
+        p("  if the design is balanced (see [7]), visual content cancels in the sums")
+        p(f"  Chance 0.5, 95% CI half-width ~{0.98 / np.sqrt(nq):.3f}")
+        p(f"{'metric':<28} {'max':>6} {'mean':>6}")
+        for s in names:
+            cells = [
+                _acc([sum(agg(r["i"][s]) - agg(r["p"][s]) for r in (a, b)) for _, a, b in quads])
+                for agg in (np.max, np.mean)
+            ]
+            p(f"{s:<28} {cells[0]:6.3f} {cells[1]:6.3f}")
+
+        p("\n[7] Quadruplet design check: mean |copy-error map| distance, first / last third")
+        p("  of the windows. Balanced design: I1 starts like P1 and ends like P2 (and I2 vice versa)")
+        combos = (("I1", "P1"), ("I1", "P2"), ("I2", "P2"), ("I2", "P1"))
+        p(f"{'scene':<8} " + " ".join(f"{u + '-' + w:>15}" for u, w in combos))
+        swapped = 0
+        for s, a, b in quads:
+            maps = {"P1": a["xp"], "I1": a["xi"], "P2": b["xp"], "I2": b["xi"]}
+            W = min(a["W"], b["W"])
+            k = max(1, W // 3)
+            early, late = slice(0, k), slice(W - k, W)
+            d = {(u, w): (_map_dist(maps[u], maps[w], early), _map_dist(maps[u], maps[w], late))
+                 for u, w in combos}
+            swapped += d["I1", "P2"][1] < d["I1", "P1"][1] and d["I2", "P1"][1] < d["I2", "P2"][1]
+            p(f"{s[:8]:<8} " + " ".join(f"{d[c][0]:7.4f}/{d[c][1]:<7.4f}" for c in combos))
+        p(f"  endings swapped (late I1 closer to P2 and I2 closer to P1): {swapped}/{nq}")
 
     report = "\n".join(lines)
     print(report)
