@@ -65,11 +65,20 @@ def encode(model, pixel_values_videos):
     """Encode frames through the V-JEPA backbone (skip predictor).
 
     Returns the concatenated distillation levels rather than the last layer:
-    that is both the predictor's expected input and the space its predictions
-    live in, so encodings and predictions are directly comparable.
+    that is the predictor's expected input, and after `normalize_levels` the
+    space its predictions live in.
     """
     with torch.autocast(pixel_values_videos.device.type, dtype=torch.float16):
         return model.encoder(pixel_values_videos)
+
+
+def normalize_levels(model, embeddings):
+    """Affine-free LayerNorm per distillation level, as applied to the training targets
+    (`forward_target` in app/vjepa_2_1/train.py). Returns float32.
+    """
+    d = model.encoder.embed_dim
+    levels = embeddings.float().split(d, dim=-1)
+    return torch.cat([F.layer_norm(lvl, (d,)) for lvl in levels], dim=-1)
 
 
 @torch.no_grad()

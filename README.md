@@ -36,9 +36,10 @@ The `base` and `large` models are deliberately **not** offered. They are distill
 
 1. Slide a window over the video. The window holds `context-frames + target-frames` frames sampled at `sample-fps`.
 2. Split the sampled frames into a context clip (the first `context-frames`) and a target clip (the rest, which follows the context without a gap).
-3. Feed them to the model and obtain the predicted target embeddings.
-4. Compute the prediction error between the true target embeddings and the predicted ones, and save the scores.
-5. Write the top surprising windows (highest prediction error) to a CSV file in the `segments` directory.
+3. Encode the context clip alone and let the predictor predict the target embeddings from it.
+4. Encode the whole window and take the target positions as the true target embeddings, layer-normalised per level as in V-JEPA 2.1 training.
+5. Compute the prediction error between the true target embeddings and the predicted ones, and save the scores.
+6. Write the top surprising windows (highest prediction error) to a CSV file in the `segments` directory.
 
 Once the pipeline produces the CSV files for all videos, the extractor script reads them and cuts the corresponding segments from the original videos.
 
@@ -140,7 +141,7 @@ The model groups every **2 frames** into one time step, and each time step is **
 3. **`--target-frames`: how far ahead the model is scored.**
    - Must be even. Same rule: `target-frames = duration × sample-fps`.
    - Predictions far from the context are harder, so scores rise with target length regardless of content. Only compare scores produced with the same settings.
-   - The predictor processes context and target tokens together: `(context-frames + target-frames) / 2 × 576` tokens. This is usually what limits GPU memory.
+   - The encoder (for the ground truth) and the predictor both process the whole window: `(context-frames + target-frames) / 2 × 576` tokens. The full-window encoder pass is usually what limits GPU memory.
 4. **`--stride-duration`: seconds between window starts.**
    - Default: the window duration, so windows tile the video without overlap.
    - A smaller stride gives overlapping windows. Surprising moments are located more precisely, but runtime grows in proportion (half the stride, twice the windows) and top segments can overlap each other.
