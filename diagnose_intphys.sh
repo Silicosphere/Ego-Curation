@@ -2,20 +2,11 @@
 #
 # INTPHYS2 PAIR DIAGNOSTIC: dense-stride dumps of every labelled IntPhys2 video,
 # then a possible/impossible pair analysis per configuration.
-# Submit with `sbatch diagnose_intphys.sh`; send back every pairs.txt under $OUT_ROOT.
-# Collection resumes (finished videos are skipped), so a timed-out job can simply
-# be resubmitted. `SPLITS=Debug sbatch diagnose_intphys.sh` runs only the quick split.
-#
-#SBATCH --job-name=intphys2-diagnose
-#SBATCH --partition=gpu
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --gres=gpu:1
-#SBATCH --mem=28G                 # default 2000 MB/CPU gets the job silently killed
-#SBATCH --time=12:00:00
-#SBATCH --exclude=gpu-03,gpu-08   # <16 GiB VRAM
-#SBATCH --output=intphys2-diagnose-%j.out
+# Run inside an interactive GPU session (srun ... --mem=28G or more):
+#   bash diagnose_intphys.sh 2>&1 | tee intphys2-diagnose.log
+# Send back every pairs.txt under $OUT_ROOT. Collection resumes (finished videos
+# are skipped), so an interrupted run can simply be restarted.
+# `SPLITS=Debug bash diagnose_intphys.sh` runs only the quick split.
 
 set -euo pipefail
 
