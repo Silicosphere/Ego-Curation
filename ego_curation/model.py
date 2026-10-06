@@ -1,3 +1,4 @@
+import copy
 import warnings
 from pathlib import Path
 
@@ -156,7 +157,12 @@ def _clean_backbone_key(state_dict):
     }
 
 
-def load_jepa2(model_size: str, device: torch.device, num_frames: int = PRETRAINED_FRAMES):
+def load_jepa2(
+    model_size: str,
+    device: torch.device,
+    num_frames: int = PRETRAINED_FRAMES,
+    online_encoder: bool = False,
+):
     """Load an official V-JEPA 2.1 model and its preprocessing function.
 
     `num_frames` must cover context + target frames of one window. Weights are
@@ -165,11 +171,15 @@ def load_jepa2(model_size: str, device: torch.device, num_frames: int = PRETRAIN
     common dtype for the SDPA kernel.
 
     The encoder is the EMA `target_encoder`, i.e. the network the predictor was
-    trained to match.
+    trained to match. With `online_encoder=True` the online `encoder` (the one
+    that produced the predictor's context during training) is also loaded, as
+    `model.online_encoder`.
     """
     spec = VJEPA_MODELS[model_size]
     model = build_jepa2(spec["hub_entry"], num_frames, device)
     check_comparable(model, spec["hub_entry"])
+    if online_encoder:
+        model["online_encoder"] = copy.deepcopy(model.encoder)
     model.half()
 
     # mmap: the files also hold optimizer state (15.7 / 28.2 GB), so only the
@@ -183,6 +193,8 @@ def load_jepa2(model_size: str, device: torch.device, num_frames: int = PRETRAIN
     )
     model.encoder.load_state_dict(_clean_backbone_key(state["target_encoder"]))
     model.predictor.load_state_dict(_clean_backbone_key(state["predictor"]))
+    if online_encoder:
+        model.online_encoder.load_state_dict(_clean_backbone_key(state["encoder"]))
     del state
 
     return model.eval(), preprocess
