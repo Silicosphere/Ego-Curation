@@ -32,7 +32,8 @@ STRIDE="${STRIDE:-0.5}"           # seconds; dense, so some target contains the 
 # target = pipeline as is; online = context from the online encoder, as in the
 # official IntPhys2 eval; c8 = 2 s context, for events early in the clip.
 CONFIGS_DEBUG=("target_c16 target 16 8" "online_c16 online 16 8" "online_c8 online 8 8")
-CONFIGS_MAIN=("target_c16 target 16 8" "online_c16 online 16 8")
+# Debug showed no difference between the context encoders, so Main runs the pipeline's.
+CONFIGS_MAIN=("target_c16 target 16 8")
 
 video_list() {  # absolute paths of the videos listed in <split dir>/metadata.csv
   python3 - "$1" <<'EOF'

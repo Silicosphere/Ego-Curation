@@ -92,6 +92,7 @@ def _build_segments_df(
     video_file: str,
     scores: list[float],
     starts: list[float],
+    copy_errors: list[float],
     config: SurpriseConfig,
     top_segments: int | None,
 ) -> pd.DataFrame:
@@ -102,6 +103,7 @@ def _build_segments_df(
             "start_sec": starts,
             "end_sec": [s + window_duration for s in starts],
             "surprise": scores,
+            "copy_error": copy_errors,
         }
     ).sort_values("surprise", ascending=False).reset_index(drop=True)
     df.insert(0, "rank", range(1, len(df) + 1))
@@ -163,11 +165,11 @@ def main(args_list: list[str] | None = None) -> None:
         out = calc_surprise_streaming(model, processor, video_file, config)
 
         if args.segments_dir:
-            scores, starts = out
+            scores, starts, copy_errors = out
             s = aggregate(scores, config.agg)
             segments_path = Path(args.segments_dir) / f"{Path(video_file).stem}_segments.csv"
             _build_segments_df(
-                video_file, scores, starts, config, args.top_segments
+                video_file, scores, starts, copy_errors, config, args.top_segments
             ).to_csv(segments_path, index=False)
             print(f"  \u2192 surprise = {s:.4f}  segments \u2192 {segments_path}")
         else:

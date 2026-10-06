@@ -67,7 +67,8 @@ for i in {0..4}; do
           --context-frames 16 \
           --target-frames 8 \
           --stride-duration 6.0 \
-          --segments-dir segments${FOLD}
+          --segments-dir segments${FOLD} \
+          --output results${FOLD}.csv
 
         echo \"[\$(hostname)] fold $FOLD finished at \$(date -Iseconds)\"
       " &

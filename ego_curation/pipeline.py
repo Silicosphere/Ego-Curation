@@ -45,7 +45,7 @@ def calc_surprise_streaming(model, processor, video_file, config: SurpriseConfig
     model_device = next(model.parameters()).device
     step, n_total, starts = window_grid(video_file, num_frames, fps, config)
 
-    scores = []
+    scores, copy_errors = [], []
     for s in starts:
         idx = sample_indices(s, n_total, step, num_frames)
         frames = vr.get_frames_at(indices=idx.tolist()).data
@@ -61,9 +61,15 @@ def calc_surprise_streaming(model, processor, video_file, config: SurpriseConfig
         tgt_emb_pred = predict_target(model, ctx_emb, tgt_emb_true.shape[1])
 
         per_window = (tgt_emb_pred.float() - tgt_emb_true).abs().mean()
+        # "Nothing changes" baseline (last context slot repeated): a motion proxy.
+        slot = n_ctx // (config.context_frames // TUBELET)
+        last = normalize_levels(model, window_emb[:, n_ctx - slot : n_ctx])
+        B, _, D = tgt_emb_true.shape
+        copy_error = (tgt_emb_true.view(B, -1, slot, D) - last.unsqueeze(1)).abs().mean()
         scores.append(per_window.item())
+        copy_errors.append(copy_error.item())
 
-        del window_proc, ctx_emb, window_emb, tgt_emb_true, tgt_emb_pred, per_window
+        del window_proc, ctx_emb, window_emb, tgt_emb_true, tgt_emb_pred, per_window, last, copy_error
         if model_device.type == "cuda":
             torch.cuda.empty_cache()
         gc.collect()
@@ -71,5 +77,5 @@ def calc_surprise_streaming(model, processor, video_file, config: SurpriseConfig
     del vr
 
     if config.return_curve:
-        return scores, [s / fps for s in starts]
+        return scores, [s / fps for s in starts], copy_errors
     return aggregate(scores, config.agg)
