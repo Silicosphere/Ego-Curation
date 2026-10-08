@@ -1,0 +1,14 @@
+rank,video,start_sec,end_sec,surprise,copy_error
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,42.0,48.0,0.3670977056026459,0.45352497696876526
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,72.0,78.0,0.3668166697025299,0.4770894944667816
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,66.0,72.0,0.3621828854084015,0.4814341068267822
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,24.0,30.0,0.35901689529418945,0.4939834475517273
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,36.0,42.0,0.35839343070983887,0.4552614688873291
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,18.0,24.0,0.3579617142677307,0.4673207104206085
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,30.0,36.0,0.35490500926971436,0.4677477478981018
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,60.0,66.0,0.3541010916233063,0.44933804869651794
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,0.0,6.0,0.35307103395462036,0.4705362021923065
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,48.0,54.0,0.34812721610069275,0.44774895906448364
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,12.0,18.0,0.3472055494785309,0.45276546478271484
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,6.0,12.0,0.32342028617858887,0.40319836139678955
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/bc864bb2-d346-4b99-a11a-bb320a563277.mp4,54.0,60.0,0.3164084553718567,0.37045249342918396

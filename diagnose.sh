@@ -4,16 +4,6 @@
 # Submit with `sbatch diagnose.sh`; send back diag_fold1/summary.txt and
 # diag_intphys/summary.txt. Override the subset size with `N_VIDEOS=40 sbatch diagnose.sh`.
 #
-#SBATCH --job-name=ego4d-diagnose
-#SBATCH --partition=gpu
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --gres=gpu:1
-#SBATCH --mem=28G                 # default 2000 MB/CPU gets the job silently killed
-#SBATCH --time=04:00:00
-#SBATCH --exclude=gpu-03,gpu-08   # <16 GiB VRAM
-#SBATCH --output=ego4d-diagnose-%j.out
 
 set -euo pipefail
 

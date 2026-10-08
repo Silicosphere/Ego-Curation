@@ -1,0 +1,1 @@
+{"cmd": "collect", "out_dir": "diag_intphys2/Debug/online_c16", "model_size": "giant", "sample_fps": 4.0, "context_frames": 16, "target_frames": 8, "stride_duration": 0.5, "n_videos": null, "device": null, "context_encoder": "online", "levels": 4, "grid": 24}

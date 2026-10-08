@@ -1,0 +1,14 @@
+rank,video,start_sec,end_sec,surprise,copy_error
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,36.0,42.0,0.3931999206542969,0.49622491002082825
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,18.0,24.0,0.3818172812461853,0.4922492206096649
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,66.0,72.0,0.3762097656726837,0.4843926429748535
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,12.0,18.0,0.368733674287796,0.48335185647010803
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,6.0,12.0,0.3607218563556671,0.4678298532962799
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,0.0,6.0,0.3551141023635864,0.44025182723999023
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,48.0,54.0,0.35483744740486145,0.45980629324913025
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,60.0,66.0,0.35336002707481384,0.46761563420295715
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,54.0,60.0,0.3443284332752228,0.46568432450294495
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,42.0,48.0,0.33788537979125977,0.445749431848526
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,24.0,30.0,0.32901841402053833,0.41096189618110657
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,72.0,78.0,0.31721368432044983,0.415343701839447
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ec54dd40-278b-47b5-bcb1-eaef24160ca4.mp4,30.0,36.0,0.30808913707733154,0.40546151995658875

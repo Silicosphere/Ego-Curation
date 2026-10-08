@@ -1,0 +1,14 @@
+rank,video,start_sec,end_sec,surprise,copy_error
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,6.0,12.0,0.37657415866851807,0.4945197105407715
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,60.0,66.0,0.37064385414123535,0.4488431513309479
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,72.0,78.0,0.36100417375564575,0.47396135330200195
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,0.0,6.0,0.36044952273368835,0.472133606672287
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,42.0,48.0,0.3516974449157715,0.4196305572986603
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,48.0,54.0,0.34851157665252686,0.45165860652923584
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,66.0,72.0,0.34848394989967346,0.47433748841285706
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,54.0,60.0,0.3426990807056427,0.4317079782485962
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,12.0,18.0,0.3259115517139435,0.44870200753211975
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,18.0,24.0,0.32302409410476685,0.3946521282196045
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,24.0,30.0,0.3160836696624756,0.3720376491546631
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,30.0,36.0,0.31569430232048035,0.40890783071517944
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold6/11ed0793-7b95-4f2f-b83a-bae81fca72e9.mp4,36.0,42.0,0.30649492144584656,0.3340659737586975

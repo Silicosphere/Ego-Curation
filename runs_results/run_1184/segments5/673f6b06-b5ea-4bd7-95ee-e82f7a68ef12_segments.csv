@@ -1,0 +1,3 @@
+rank,video,start_sec,end_sec,surprise,copy_error
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/673f6b06-b5ea-4bd7-95ee-e82f7a68ef12.mp4,6.0,12.0,0.36604389548301697,0.4828857183456421
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold5/673f6b06-b5ea-4bd7-95ee-e82f7a68ef12.mp4,0.0,6.0,0.3597733974456787,0.4759409725666046

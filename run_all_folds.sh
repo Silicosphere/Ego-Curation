@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# PARALLEL RUN — 5 folds on 5 nodes simultaneously.
+# PARALLEL RUN
 #
 # Measured from profiling job 1109 (fold 1, 2-hour run):
 #   MaxRSS = 15.6 GiB  → --mem=20G (15.6 GiB + 20% headroom)
@@ -16,7 +16,7 @@
 #SBATCH --gres=gpu:1              # 1 GPU per node; --exclude below enforces >=16 GiB
 #SBATCH --mem=20G                 # 15.6 GiB peak RSS + 20% headroom (per node)
 #SBATCH --time=48:00:00
-#SBATCH --exclude=gpu-03,gpu-08,gpu-05   # these are the only nodes with <16 GiB GPUs
+#SBATCH --exclude=gpu-03,gpu-08   # these are the only nodes with <16 GiB GPUs
 #SBATCH --output=ego4d-allfolds-%j.out
 #SBATCH --error=ego4d-allfolds-%j.err
 

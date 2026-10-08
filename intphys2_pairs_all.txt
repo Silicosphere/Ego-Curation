@@ -1,0 +1,270 @@
+##### diag_intphys2/Debug/online_c16/pairs.txt
+model=giant context_encoder=online fps=4.0 ctx=16 tgt=8 stride=0.5
+pairs=30 (missing dumps: 0, scenes without both labels: 0); windows per pair: median 31, min 31, max 31
+
+[1] Pairwise accuracy = share of pairs where the impossible video scores higher
+  max / mean = aggregate over aligned windows; onset = the window where the pair
+  first diverges (event in target); AUROC = all impossible vs all possible videos,
+  max aggregate, no pairing. Chance 0.5, 95% CI half-width ~0.179
+metric                          max   mean  onset  AUROC
+mean (current)                0.367  0.367  0.333  0.482
+level 1 mean                  0.400  0.400  0.467  0.484
+level 2 mean                  0.300  0.467  0.400  0.478
+level 3 mean                  0.467  0.367  0.433  0.499
+level 4 mean                  0.500  0.400  0.300  0.502
+top-1% tokens                 0.433  0.500  0.400  0.497
+top-1% tokens, level 4        0.467  0.467  0.500  0.498
+pred/copy ratio               0.400  0.500  0.533  0.499
+pred/copy ratio, level 4      0.467  0.500  0.467  0.500
+1 - cos                       0.467  0.400  0.367  0.483
+copy error (motion)           0.467  0.433  0.467  0.514
+pred - copy                   0.433  0.533  0.533  0.501
+
+[2] Pairwise accuracy by condition (max aggregate)
+condition           n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+permanence         12          0.417          0.417          0.417          0.417          0.333
+solidity           18          0.333          0.556          0.389          0.444          0.556
+
+[2] Pairwise accuracy by Camera (max aggregate)
+Camera              n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+Fixed              30          0.367          0.500          0.400          0.433          0.467
+
+[2] Pairwise accuracy by Difficulty (max aggregate)
+Difficulty          n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+Easy               30          0.367          0.500          0.400          0.433          0.467
+
+[3] Event-locked difference, impossible - possible: mean / share > 0
+  offset in windows (0.5 s each) from the onset window
+ offset     n   mean (current)     level 4 mean      pred - copy copy error (moti
+     -4     8     -0.0006/0.38     -0.0014/0.38     -0.0017/0.50     +0.0011/0.50
+     -3     8     -0.0004/0.38     -0.0001/0.38     -0.0026/0.38     +0.0022/0.50
+     -2    10     -0.0000/0.40     -0.0001/0.40     -0.0007/0.40     +0.0006/0.40
+     -1    10     +0.0001/0.40     -0.0002/0.40     +0.0010/0.70     -0.0010/0.30
+     +0    30     -0.0003/0.33     -0.0008/0.30     +0.0003/0.53     -0.0005/0.47
+     +1    30     -0.0001/0.47     -0.0005/0.47     -0.0016/0.33     +0.0015/0.63
+     +2    30     +0.0001/0.53     -0.0003/0.43     -0.0010/0.47     +0.0011/0.57
+     +3    30     +0.0002/0.50     +0.0003/0.53     -0.0009/0.40     +0.0012/0.57
+     +4    30     -0.0007/0.50     -0.0010/0.50     -0.0021/0.47     +0.0014/0.53
+     +5    30     -0.0010/0.47     -0.0015/0.43     -0.0002/0.33     -0.0009/0.53
+     +6    30     -0.0008/0.47     -0.0012/0.43     +0.0027/0.57     -0.0035/0.50
+     +7    30     -0.0004/0.50     -0.0005/0.47     +0.0017/0.47     -0.0021/0.57
+     +8    30     +0.0003/0.60     +0.0004/0.53     +0.0023/0.50     -0.0019/0.47
+
+[4] Divergence onset (start of the first target that differs within the pair)
+  onset sec percentiles 10/50/90: 4.0/4.0/8.5
+  onset in the first window (event may precede the first target): 20/30
+  pairs whose dumps never diverge (max div < 0.001): 0/30
+  pre-onset divergence / peak, median: 0.281 (near 0 = sharp onset)
+
+[5] Per pair (cur = mean (current); d = impossible - possible at the onset window)
+scene    pfx condition    camera  diff      W onset s cur max p cur max i    d cur    d p-c
+0          1 solidity     Fixed   Easy     31     4.0    0.2811    0.2798  -0.0014  +0.0016
+0          2 solidity     Fixed   Easy     31     4.0    0.2789    0.2781  -0.0009  +0.0014
+0_1        1 solidity     Fixed   Easy     31     4.0    0.2809    0.2803  -0.0006  +0.0029
+0_1        2 solidity     Fixed   Easy     31     4.0    0.2789    0.2795  -0.0005  +0.0014
+0_2        1 solidity     Fixed   Easy     31     4.0    0.2803    0.2816  +0.0015  -0.0016
+0_2        2 solidity     Fixed   Easy     31     4.0    0.2794    0.2800  -0.0000  -0.0007
+1          1 solidity     Fixed   Easy     31     8.5    0.3538    0.3538  -0.0127  +0.0232
+1          2 solidity     Fixed   Easy     31     8.5    0.3539    0.3494  +0.0122  -0.0270
+1_1        1 solidity     Fixed   Easy     31     8.5    0.3486    0.3529  -0.0118  +0.0226
+1_1        2 solidity     Fixed   Easy     31     8.5    0.3512    0.3496  +0.0129  -0.0231
+1_2        1 solidity     Fixed   Easy     31     8.5    0.3497    0.3524  -0.0114  +0.0218
+1_2        2 solidity     Fixed   Easy     31     8.5    0.3525    0.3476  +0.0094  -0.0232
+2          1 solidity     Fixed   Easy     31     4.0    0.2967    0.2955  -0.0005  +0.0013
+2          2 solidity     Fixed   Easy     31     4.0    0.2964    0.2963  -0.0013  +0.0007
+2_1        1 solidity     Fixed   Easy     31     4.0    0.2955    0.2946  -0.0012  -0.0001
+2_1        2 solidity     Fixed   Easy     31     4.0    0.2952    0.2950  -0.0002  +0.0005
+2_2        1 solidity     Fixed   Easy     31     4.0    0.2962    0.2951  +0.0046  -0.0103
+2_2        2 solidity     Fixed   Easy     31     4.0    0.2966    0.2972  +0.0014  -0.0015
+3          1 permanence   Fixed   Easy     31     4.0    0.3392    0.3405  +0.0003  +0.0000
+3          2 permanence   Fixed   Easy     31     4.0    0.3382    0.3377  -0.0008  -0.0022
+3_1        1 permanence   Fixed   Easy     31     4.0    0.3392    0.3396  -0.0006  -0.0012
+3_1        2 permanence   Fixed   Easy     31     4.0    0.3411    0.3393  -0.0002  -0.0007
+3_2        1 permanence   Fixed   Easy     31     4.0    0.3394    0.3400  -0.0004  -0.0006
+3_2        2 permanence   Fixed   Easy     31     4.0    0.3394    0.3387  -0.0003  -0.0009
+4          1 permanence   Fixed   Easy     31     7.0    0.2792    0.2807  -0.0067  -0.0043
+4          2 permanence   Fixed   Easy     31     4.0    0.2797    0.2796  -0.0020  +0.0082
+4_1        1 permanence   Fixed   Easy     31     5.0    0.2800    0.2814  +0.0001  +0.0007
+4_1        2 permanence   Fixed   Easy     31     5.0    0.2797    0.2791  +0.0021  +0.0047
+4_2        1 permanence   Fixed   Easy     31     4.0    0.2809    0.2786  -0.0045  +0.0109
+4_2        2 permanence   Fixed   Easy     31     7.0    0.2813    0.2798  +0.0053  +0.0038
+##### diag_intphys2/Debug/online_c8/pairs.txt
+model=giant context_encoder=online fps=4.0 ctx=8 tgt=8 stride=0.5
+pairs=30 (missing dumps: 0, scenes without both labels: 0); windows per pair: median 35, min 35, max 35
+
+[1] Pairwise accuracy = share of pairs where the impossible video scores higher
+  max / mean = aggregate over aligned windows; onset = the window where the pair
+  first diverges (event in target); AUROC = all impossible vs all possible videos,
+  max aggregate, no pairing. Chance 0.5, 95% CI half-width ~0.179
+metric                          max   mean  onset  AUROC
+mean (current)                0.433  0.400  0.467  0.516
+level 1 mean                  0.433  0.400  0.533  0.489
+level 2 mean                  0.500  0.400  0.433  0.519
+level 3 mean                  0.467  0.333  0.533  0.499
+level 4 mean                  0.467  0.333  0.500  0.500
+top-1% tokens                 0.533  0.533  0.533  0.501
+top-1% tokens, level 4        0.400  0.433  0.533  0.479
+pred/copy ratio               0.467  0.467  0.600  0.498
+pred/copy ratio, level 4      0.467  0.500  0.600  0.502
+1 - cos                       0.467  0.300  0.500  0.534
+copy error (motion)           0.467  0.433  0.500  0.493
+pred - copy                   0.467  0.500  0.600  0.497
+
+[2] Pairwise accuracy by condition (max aggregate)
+condition           n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+permanence         12          0.500          0.417          0.500          0.500          0.333
+solidity           18          0.389          0.500          0.444          0.444          0.556
+
+[2] Pairwise accuracy by Camera (max aggregate)
+Camera              n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+Fixed              30          0.433          0.467          0.467          0.467          0.467
+
+[2] Pairwise accuracy by Difficulty (max aggregate)
+Difficulty          n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+Easy               30          0.433          0.467          0.467          0.467          0.467
+
+[3] Event-locked difference, impossible - possible: mean / share > 0
+  offset in windows (0.5 s each) from the onset window
+ offset     n   mean (current)     level 4 mean      pred - copy copy error (moti
+     -4    14     +0.0001/0.43     -0.0004/0.50     -0.0006/0.64     +0.0007/0.50
+     -3    15     -0.0003/0.47     -0.0003/0.40     -0.0019/0.13     +0.0017/0.60
+     -2    18     +0.0005/0.44     +0.0008/0.72     -0.0005/0.50     +0.0010/0.50
+     -1    18     -0.0001/0.39     +0.0003/0.56     -0.0005/0.56     +0.0004/0.50
+     +0    30     -0.0000/0.47     -0.0001/0.50     +0.0006/0.60     -0.0006/0.50
+     +1    30     +0.0001/0.43     +0.0001/0.40     +0.0004/0.47     -0.0003/0.53
+     +2    30     -0.0000/0.33     -0.0004/0.33     +0.0003/0.63     -0.0003/0.40
+     +3    30     -0.0001/0.37     -0.0003/0.33     +0.0008/0.60     -0.0009/0.40
+     +4    30     -0.0008/0.40     -0.0013/0.37     -0.0004/0.60     -0.0004/0.37
+     +5    30     -0.0007/0.40     -0.0009/0.47     -0.0008/0.47     +0.0001/0.50
+     +6    30     -0.0005/0.60     -0.0007/0.50     +0.0007/0.47     -0.0012/0.57
+     +7    30     -0.0001/0.57     -0.0004/0.43     +0.0011/0.43     -0.0012/0.63
+     +8    30     -0.0000/0.50     -0.0003/0.53     -0.0002/0.40     +0.0002/0.53
+
+[4] Divergence onset (start of the first target that differs within the pair)
+  onset sec percentiles 10/50/90: 2.0/3.2/8.5
+  onset in the first window (event may precede the first target): 12/30
+  pairs whose dumps never diverge (max div < 0.001): 0/30
+  pre-onset divergence / peak, median: 0.437 (near 0 = sharp onset)
+
+[5] Per pair (cur = mean (current); d = impossible - possible at the onset window)
+scene    pfx condition    camera  diff      W onset s cur max p cur max i    d cur    d p-c
+0          1 solidity     Fixed   Easy     35     2.0    0.2804    0.2795  -0.0021  +0.0015
+0          2 solidity     Fixed   Easy     35     2.0    0.2811    0.2808  -0.0000  +0.0025
+0_1        1 solidity     Fixed   Easy     35     2.0    0.2809    0.2806  +0.0021  -0.0072
+0_1        2 solidity     Fixed   Easy     35     4.0    0.2801    0.2811  +0.0002  +0.0017
+0_2        1 solidity     Fixed   Easy     35     2.0    0.2794    0.2841  -0.0030  +0.0052
+0_2        2 solidity     Fixed   Easy     35     2.0    0.2808    0.2807  -0.0005  -0.0007
+1          1 solidity     Fixed   Easy     35     8.5    0.3532    0.3522  -0.0104  +0.0247
+1          2 solidity     Fixed   Easy     35     8.5    0.3527    0.3493  +0.0095  -0.0306
+1_1        1 solidity     Fixed   Easy     35     8.5    0.3467    0.3522  -0.0097  +0.0255
+1_1        2 solidity     Fixed   Easy     35     8.5    0.3508    0.3481  +0.0098  -0.0258
+1_2        1 solidity     Fixed   Easy     35     8.5    0.3477    0.3527  -0.0091  +0.0244
+1_2        2 solidity     Fixed   Easy     35     8.5    0.3510    0.3469  +0.0062  -0.0265
+2          1 solidity     Fixed   Easy     35     2.0    0.2971    0.2967  -0.0001  +0.0018
+2          2 solidity     Fixed   Easy     35     2.0    0.2966    0.2973  +0.0007  +0.0008
+2_1        1 solidity     Fixed   Easy     35     2.0    0.2973    0.2974  +0.0007  -0.0001
+2_1        2 solidity     Fixed   Easy     35     2.0    0.2965    0.2963  -0.0005  -0.0011
+2_2        1 solidity     Fixed   Easy     35     2.0    0.2977    0.2973  -0.0023  +0.0072
+2_2        2 solidity     Fixed   Easy     35     2.0    0.2968    0.2974  +0.0006  +0.0006
+3          1 permanence   Fixed   Easy     35     4.0    0.3431    0.3426  +0.0009  +0.0008
+3          2 permanence   Fixed   Easy     35     4.0    0.3428    0.3428  -0.0007  -0.0025
+3_1        1 permanence   Fixed   Easy     35     3.5    0.3429    0.3436  +0.0005  -0.0022
+3_1        2 permanence   Fixed   Easy     35     4.0    0.3426    0.3421  +0.0009  +0.0007
+3_2        1 permanence   Fixed   Easy     35     4.0    0.3425    0.3430  -0.0006  -0.0011
+3_2        2 permanence   Fixed   Easy     35     4.0    0.3435    0.3431  -0.0007  -0.0013
+4          1 permanence   Fixed   Easy     35     5.0    0.2842    0.2863  -0.0006  +0.0049
+4          2 permanence   Fixed   Easy     35     2.0    0.2837    0.2856  +0.0019  +0.0031
+4_1        1 permanence   Fixed   Easy     35     3.0    0.2824    0.2841  -0.0003  -0.0011
+4_1        2 permanence   Fixed   Easy     35     3.0    0.2850    0.2847  +0.0005  +0.0020
+4_2        1 permanence   Fixed   Easy     35     3.0    0.2860    0.2859  -0.0020  +0.0057
+4_2        2 permanence   Fixed   Easy     35     7.0    0.2846    0.2828  +0.0070  +0.0043
+##### diag_intphys2/Debug/target_c16/pairs.txt
+model=giant context_encoder=target fps=4.0 ctx=16 tgt=8 stride=0.5
+pairs=30 (missing dumps: 0, scenes without both labels: 0); windows per pair: median 31, min 31, max 31
+
+[1] Pairwise accuracy = share of pairs where the impossible video scores higher
+  max / mean = aggregate over aligned windows; onset = the window where the pair
+  first diverges (event in target); AUROC = all impossible vs all possible videos,
+  max aggregate, no pairing. Chance 0.5, 95% CI half-width ~0.179
+metric                          max   mean  onset  AUROC
+mean (current)                0.400  0.400  0.300  0.483
+level 1 mean                  0.533  0.433  0.467  0.492
+level 2 mean                  0.333  0.467  0.433  0.478
+level 3 mean                  0.500  0.400  0.400  0.493
+level 4 mean                  0.500  0.400  0.367  0.503
+top-1% tokens                 0.400  0.533  0.367  0.494
+top-1% tokens, level 4        0.467  0.467  0.533  0.511
+pred/copy ratio               0.400  0.500  0.500  0.496
+pred/copy ratio, level 4      0.433  0.500  0.467  0.494
+1 - cos                       0.433  0.433  0.400  0.487
+copy error (motion)           0.467  0.433  0.467  0.514
+pred - copy                   0.433  0.500  0.500  0.499
+
+[2] Pairwise accuracy by condition (max aggregate)
+condition           n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+permanence         12          0.583          0.500          0.417          0.417          0.333
+solidity           18          0.278          0.500          0.389          0.444          0.556
+
+[2] Pairwise accuracy by Camera (max aggregate)
+Camera              n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+Fixed              30          0.400          0.500          0.400          0.433          0.467
+
+[2] Pairwise accuracy by Difficulty (max aggregate)
+Difficulty          n mean (current)   level 4 mean pred/copy rati    pred - copy copy error (mo
+Easy               30          0.400          0.500          0.400          0.433          0.467
+
+[3] Event-locked difference, impossible - possible: mean / share > 0
+  offset in windows (0.5 s each) from the onset window
+ offset     n   mean (current)     level 4 mean      pred - copy copy error (moti
+     -4     8     -0.0012/0.38     -0.0023/0.38     -0.0023/0.25     +0.0011/0.50
+     -3     8     -0.0002/0.38     +0.0002/0.38     -0.0024/0.38     +0.0022/0.50
+     -2    10     -0.0001/0.30     -0.0001/0.40     -0.0007/0.40     +0.0006/0.40
+     -1    10     -0.0001/0.40     -0.0004/0.40     +0.0009/0.70     -0.0010/0.30
+     +0    30     -0.0002/0.30     -0.0007/0.37     +0.0003/0.50     -0.0005/0.47
+     +1    30     -0.0000/0.47     -0.0003/0.37     -0.0015/0.37     +0.0015/0.63
+     +2    30     +0.0002/0.57     -0.0001/0.43     -0.0009/0.50     +0.0011/0.57
+     +3    30     +0.0002/0.53     +0.0002/0.63     -0.0010/0.40     +0.0012/0.57
+     +4    30     -0.0008/0.50     -0.0011/0.50     -0.0022/0.47     +0.0014/0.53
+     +5    30     -0.0010/0.50     -0.0015/0.43     -0.0002/0.33     -0.0009/0.53
+     +6    30     -0.0008/0.47     -0.0012/0.43     +0.0027/0.57     -0.0035/0.50
+     +7    30     -0.0003/0.50     -0.0004/0.50     +0.0018/0.50     -0.0021/0.57
+     +8    30     +0.0003/0.63     +0.0004/0.53     +0.0023/0.50     -0.0019/0.47
+
+[4] Divergence onset (start of the first target that differs within the pair)
+  onset sec percentiles 10/50/90: 4.0/4.0/8.5
+  onset in the first window (event may precede the first target): 20/30
+  pairs whose dumps never diverge (max div < 0.001): 0/30
+  pre-onset divergence / peak, median: 0.281 (near 0 = sharp onset)
+
+[5] Per pair (cur = mean (current); d = impossible - possible at the onset window)
+scene    pfx condition    camera  diff      W onset s cur max p cur max i    d cur    d p-c
+0          1 solidity     Fixed   Easy     31     4.0    0.2813    0.2799  -0.0012  +0.0018
+0          2 solidity     Fixed   Easy     31     4.0    0.2785    0.2780  -0.0010  +0.0013
+0_1        1 solidity     Fixed   Easy     31     4.0    0.2807    0.2801  -0.0003  +0.0031
+0_1        2 solidity     Fixed   Easy     31     4.0    0.2781    0.2793  -0.0000  +0.0020
+0_2        1 solidity     Fixed   Easy     31     4.0    0.2804    0.2804  +0.0017  -0.0014
+0_2        2 solidity     Fixed   Easy     31     4.0    0.2788    0.2799  -0.0000  -0.0007
+1          1 solidity     Fixed   Easy     31     8.5    0.3547    0.3531  -0.0120  +0.0239
+1          2 solidity     Fixed   Easy     31     8.5    0.3531    0.3484  +0.0123  -0.0270
+1_1        1 solidity     Fixed   Easy     31     8.5    0.3480    0.3515  -0.0114  +0.0230
+1_1        2 solidity     Fixed   Easy     31     8.5    0.3504    0.3485  +0.0126  -0.0234
+1_2        1 solidity     Fixed   Easy     31     8.5    0.3494    0.3511  -0.0111  +0.0221
+1_2        2 solidity     Fixed   Easy     31     8.5    0.3526    0.3466  +0.0095  -0.0231
+2          1 solidity     Fixed   Easy     31     4.0    0.2966    0.2957  -0.0004  +0.0014
+2          2 solidity     Fixed   Easy     31     4.0    0.2964    0.2964  -0.0016  +0.0004
+2_1        1 solidity     Fixed   Easy     31     4.0    0.2954    0.2947  -0.0011  -0.0000
+2_1        2 solidity     Fixed   Easy     31     4.0    0.2952    0.2947  -0.0002  +0.0005
+2_2        1 solidity     Fixed   Easy     31     4.0    0.2962    0.2950  +0.0046  -0.0103
+2_2        2 solidity     Fixed   Easy     31     4.0    0.2967    0.2972  +0.0013  -0.0017
+3          1 permanence   Fixed   Easy     31     4.0    0.3395    0.3401  -0.0001  -0.0004
+3          2 permanence   Fixed   Easy     31     4.0    0.3372    0.3373  -0.0009  -0.0023
+3_1        1 permanence   Fixed   Easy     31     4.0    0.3384    0.3396  -0.0006  -0.0012
+3_1        2 permanence   Fixed   Easy     31     4.0    0.3409    0.3391  -0.0001  -0.0007
+3_2        1 permanence   Fixed   Easy     31     4.0    0.3392    0.3396  -0.0004  -0.0006
+3_2        2 permanence   Fixed   Easy     31     4.0    0.3391    0.3391  -0.0001  -0.0007
+4          1 permanence   Fixed   Easy     31     7.0    0.2790    0.2807  -0.0065  -0.0041
+4          2 permanence   Fixed   Easy     31     4.0    0.2793    0.2793  -0.0019  +0.0083
+4_1        1 permanence   Fixed   Easy     31     5.0    0.2800    0.2813  +0.0003  +0.0009
+4_1        2 permanence   Fixed   Easy     31     5.0    0.2795    0.2789  +0.0018  +0.0043
+4_2        1 permanence   Fixed   Easy     31     4.0    0.2805    0.2784  -0.0046  +0.0108
+4_2        2 permanence   Fixed   Easy     31     7.0    0.2810    0.2796  +0.0050  +0.0035

@@ -1,0 +1,14 @@
+rank,video,start_sec,end_sec,surprise,copy_error
+1,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,6.0,12.0,0.3717890977859497,0.5003098845481873
+2,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,36.0,42.0,0.36614125967025757,0.4823109805583954
+3,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,66.0,72.0,0.3652324378490448,0.49381548166275024
+4,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,18.0,24.0,0.36176809668540955,0.4755660593509674
+5,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,42.0,48.0,0.3595244288444519,0.4655492901802063
+6,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,0.0,6.0,0.35792669653892517,0.4763822555541992
+7,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,54.0,60.0,0.35009831190109253,0.4619855284690857
+8,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,48.0,54.0,0.3480849266052246,0.4565753638744354
+9,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,72.0,78.0,0.3448230028152466,0.44278624653816223
+10,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,12.0,18.0,0.3402237892150879,0.4218958914279938
+11,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,30.0,36.0,0.3353802561759949,0.4280511140823364
+12,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,24.0,30.0,0.33466511964797974,0.4423024356365204
+13,/data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold1/ccbaf895-24d6-4a7d-9974-4d1bc20073e2.mp4,60.0,66.0,0.3323553204536438,0.4339679777622223
