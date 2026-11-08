@@ -1,15 +1,18 @@
 """Extract the most surprising segments from per-video segment CSVs into clip files via ffmpeg.
 
 Each CSV gets its own subdirectory of the output directory, named after the CSV's video.
-By default every segment in each CSV is extracted, re-encoded for frame-accurate cuts.
+By default every segment in each CSV is extracted by stream copy (no re-encoding). Copy cuts
+snap to the previous keyframe, which is exact for intra-only video (every frame a keyframe);
+pass --reencode for frame-accurate cuts of videos with sparse keyframes.
 
 Usage:
     python -m ego_curation.extract segments/*.csv --output clips/
-    python -m ego_curation.extract segments/*.csv --top-segments 20 --video-root /data/videos
+    python -m ego_curation.extract segments/*.csv --top-segments 20 --video-root /data/videos --jobs 8
 """
 import argparse
 import shutil
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pandas as pd
@@ -54,10 +57,16 @@ def build_parser() -> argparse.ArgumentParser:
         "absolute path (for CSVs written on another machine)",
     )
     parser.add_argument(
-        "--fast",
+        "--reencode",
         action="store_true",
-        help="Stream-copy instead of re-encoding (much faster, but cuts snap to the "
-        "previous keyframe, so clips can start seconds early)",
+        help="Re-encode for frame-accurate cuts (slower). Only needed when keyframes are "
+        "sparse; the default stream copy snaps each cut to the previous keyframe",
+    )
+    parser.add_argument(
+        "--jobs", "-j",
+        type=_positive_int,
+        default=1,
+        help="Number of ffmpeg processes to run in parallel (default: 1)",
     )
     parser.add_argument(
         "--no-overlap",
@@ -110,16 +119,17 @@ def _resolve_video(
 
 
 def _ffmpeg_cmd(
-    ffmpeg: str, video_path: Path, start: float, duration: float, out_file: Path, fast: bool
+    ffmpeg: str, video_path: Path, start: float, duration: float, out_file: Path,
+    reencode: bool,
 ) -> list[str]:
-    # -ss before -i seeks on input. With re-encoding this is frame-accurate (FFmpeg >= 2.1)
-    # and avoids decoding from the start of the video for every clip.
+    # -ss before -i seeks on input, so ffmpeg never decodes from the start of the video.
+    # With re-encoding this is still frame-accurate (FFmpeg >= 2.1).
     cmd = [ffmpeg, "-y", "-loglevel", "error", "-ss", f"{start:.3f}", "-i", str(video_path),
            "-t", f"{duration:.3f}"]
-    if fast:
-        cmd += ["-c", "copy", "-avoid_negative_ts", "make_zero"]
-    else:
+    if reencode:
         cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-c:a", "aac"]
+    else:
+        cmd += ["-c", "copy", "-avoid_negative_ts", "make_zero"]
     return cmd + [str(out_file)]
 
 
@@ -129,7 +139,8 @@ def extract(
     top_segments: int | None = None,
     video: str | None = None,
     video_root: str | None = None,
-    fast: bool = False,
+    reencode: bool = False,
+    jobs: int = 1,
     no_overlap: bool = False,
     skip_existing: bool = False,
     ffmpeg: str = "ffmpeg",
@@ -173,8 +184,9 @@ def extract(
         csv_out_dir = out_dir / video_path.stem
         csv_out_dir.mkdir(parents=True, exist_ok=True)
 
+        cmds = []
         n_csv_ok = 0
-        for row in tqdm(df.itertuples(index=False), desc=video_path.stem[:16], total=len(df)):
+        for row in df.itertuples(index=False):
             start = float(row.start_sec)
             duration = float(row.end_sec) - start
             out_file = csv_out_dir / \
@@ -182,14 +194,18 @@ def extract(
             if skip_existing and out_file.exists():
                 n_csv_ok += 1
                 continue
+            cmds.append(_ffmpeg_cmd(ffmpeg, video_path, start, duration, out_file, reencode))
 
-            cmd = _ffmpeg_cmd(ffmpeg, video_path, start, duration, out_file, fast)
-            try:
-                subprocess.run(cmd, check=True, capture_output=True, text=True)
-                n_csv_ok += 1
-            except subprocess.CalledProcessError as e:
-                n_failed += 1
-                tqdm.write(f"ffmpeg failed for {out_file.name}:\n{e.stderr.strip()}")
+        with ThreadPoolExecutor(max_workers=jobs) as pool:
+            results = pool.map(
+                lambda cmd: subprocess.run(cmd, capture_output=True, text=True), cmds)
+            for proc in tqdm(results, desc=video_path.stem[:16], total=len(cmds)):
+                if proc.returncode == 0:
+                    n_csv_ok += 1
+                else:
+                    n_failed += 1
+                    tqdm.write(f"ffmpeg failed for {Path(proc.args[-1]).name}:\n"
+                               f"{proc.stderr.strip()}")
 
         n_ok += n_csv_ok
         print(f"Extracted {n_csv_ok}/{len(df)} clips to {csv_out_dir}")
@@ -206,7 +222,8 @@ def main(args_list: list[str] | None = None) -> None:
         top_segments=args.top_segments,
         video=args.video,
         video_root=args.video_root,
-        fast=args.fast,
+        reencode=args.reencode,
+        jobs=args.jobs,
         no_overlap=args.no_overlap,
         skip_existing=args.skip_existing,
         ffmpeg=args.ffmpeg,
