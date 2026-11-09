@@ -1,13 +1,15 @@
 """Extract the most surprising segments from per-video segment CSVs into clip files via ffmpeg.
 
 Each CSV gets its own subdirectory of the output directory, named after the CSV's video.
-By default every segment in each CSV is extracted by stream copy (no re-encoding). Copy cuts
-snap to the previous keyframe, which is exact for intra-only video (every frame a keyframe);
-pass --reencode for frame-accurate cuts of videos with sparse keyframes.
+By default every segment in each CSV is extracted, and the cut method is picked per video:
+stream copy (fast) cuts can only start at a keyframe, so they are used only when the video's
+keyframes are at most --max-keyframe-gap seconds apart (e.g. intra-only video). Otherwise the
+clip is re-encoded for a frame-accurate cut.
 
 Usage:
     python -m ego_curation.extract segments/*.csv --output clips/
     python -m ego_curation.extract segments/*.csv --top-segments 20 --video-root /data/videos --jobs 8
+    python -m ego_curation.extract segments/*.csv --cut-mode reencode --video-codec h264_nvenc
 """
 import argparse
 import shutil
@@ -19,6 +21,14 @@ import pandas as pd
 from tqdm.auto import tqdm
 
 REQUIRED = ("video", "start_sec", "end_sec", "surprise")
+PROBE_SECONDS = 60
+
+
+def _positive_float(value: str) -> float:
+    x = float(value)
+    if x <= 0:
+        raise argparse.ArgumentTypeError(f"must be positive, got {value}")
+    return x
 
 
 def _positive_int(value: str) -> int:
@@ -57,10 +67,30 @@ def build_parser() -> argparse.ArgumentParser:
         "absolute path (for CSVs written on another machine)",
     )
     parser.add_argument(
-        "--reencode",
+        "--cut-mode",
+        choices=("auto", "copy", "reencode"),
+        default="auto",
+        help="auto (default): stream copy if the video's keyframes are dense enough, "
+        "otherwise re-encode. copy: always stream copy (fast; cuts snap to the previous "
+        "keyframe). reencode: always re-encode (frame-accurate, slower)",
+    )
+    parser.add_argument(
+        "--max-keyframe-gap",
+        type=_positive_float,
+        default=0.5,
+        help="In auto mode, the largest keyframe spacing (s) at which stream copy is "
+        "still used (default: 0.5)",
+    )
+    parser.add_argument(
+        "--video-codec",
+        default="libx264",
+        help="Video encoder for re-encoding (default: libx264; h264_nvenc uses the GPU "
+        "if your ffmpeg build supports it)",
+    )
+    parser.add_argument(
+        "--no-audio",
         action="store_true",
-        help="Re-encode for frame-accurate cuts (slower). Only needed when keyframes are "
-        "sparse; the default stream copy snaps each cut to the previous keyframe",
+        help="Drop the audio stream from the clips",
     )
     parser.add_argument(
         "--jobs", "-j",
@@ -81,6 +111,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--ffmpeg", default="ffmpeg", help="ffmpeg executable path (default: ffmpeg)"
+    )
+    parser.add_argument(
+        "--ffprobe", default="ffprobe", help="ffprobe executable path (default: ffprobe)"
     )
     return parser
 
@@ -118,18 +151,58 @@ def _resolve_video(
     return csv_video
 
 
+def _max_keyframe_gap(ffprobe: str, video_path: Path) -> float | None:
+    """Largest gap (s) between video keyframes in the first PROBE_SECONDS of the video.
+
+    Reads packet flags only (no decoding), so it is fast. Returns None if it cannot tell.
+    """
+    cmd = [ffprobe, "-v", "error", "-select_streams", "v:0",
+           "-read_intervals", f"%+{PROBE_SECONDS}",
+           "-show_entries", "packet=pts_time,flags", "-of", "csv=p=0", str(video_path)]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        return None
+    key_times = []
+    for line in proc.stdout.splitlines():
+        pts, _, flags = line.partition(",")
+        if "K" in flags and pts not in ("", "N/A"):
+            key_times.append(float(pts))
+    key_times.sort()
+    if len(key_times) < 2:
+        return None
+    return max(b - a for a, b in zip(key_times, key_times[1:]))
+
+
+def _use_reencode(cut_mode: str, ffprobe: str, video_path: Path, max_gap: float) -> bool:
+    if cut_mode != "auto":
+        return cut_mode == "reencode"
+    gap = _max_keyframe_gap(ffprobe, video_path)
+    if gap is None:
+        print(f"  could not read keyframes of {video_path.name}; re-encoding")
+        return True
+    reencode = gap > max_gap
+    print(f"  {video_path.name}: keyframes up to {gap:.2f} s apart -> "
+          f"{'re-encode' if reencode else 'stream copy'}")
+    return reencode
+
+
 def _ffmpeg_cmd(
     ffmpeg: str, video_path: Path, start: float, duration: float, out_file: Path,
-    reencode: bool,
+    reencode: bool, video_codec: str, no_audio: bool,
 ) -> list[str]:
     # -ss before -i seeks on input, so ffmpeg never decodes from the start of the video.
     # With re-encoding this is still frame-accurate (FFmpeg >= 2.1).
     cmd = [ffmpeg, "-y", "-loglevel", "error", "-ss", f"{start:.3f}", "-i", str(video_path),
            "-t", f"{duration:.3f}"]
     if reencode:
-        cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-c:a", "aac"]
+        cmd += ["-c:v", video_codec]
+        if video_codec == "libx264":
+            cmd += ["-preset", "veryfast", "-crf", "18"]
+        cmd += ["-an"] if no_audio else ["-c:a", "aac"]
     else:
         cmd += ["-c", "copy", "-avoid_negative_ts", "make_zero"]
+        if no_audio:
+            cmd += ["-an"]
     return cmd + [str(out_file)]
 
 
@@ -139,11 +212,15 @@ def extract(
     top_segments: int | None = None,
     video: str | None = None,
     video_root: str | None = None,
-    reencode: bool = False,
+    cut_mode: str = "auto",
+    max_keyframe_gap: float = 0.5,
+    video_codec: str = "libx264",
+    no_audio: bool = False,
     jobs: int = 1,
     no_overlap: bool = False,
     skip_existing: bool = False,
     ffmpeg: str = "ffmpeg",
+    ffprobe: str = "ffprobe",
 ) -> None:
     if shutil.which(ffmpeg) is None:
         raise SystemExit(
@@ -181,6 +258,7 @@ def extract(
             n_skipped_csv += 1
             continue
 
+        reencode = _use_reencode(cut_mode, ffprobe, video_path, max_keyframe_gap)
         csv_out_dir = out_dir / video_path.stem
         csv_out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -194,7 +272,8 @@ def extract(
             if skip_existing and out_file.exists():
                 n_csv_ok += 1
                 continue
-            cmds.append(_ffmpeg_cmd(ffmpeg, video_path, start, duration, out_file, reencode))
+            cmds.append(_ffmpeg_cmd(ffmpeg, video_path, start, duration, out_file,
+                                    reencode, video_codec, no_audio))
 
         with ThreadPoolExecutor(max_workers=jobs) as pool:
             results = pool.map(
@@ -222,11 +301,15 @@ def main(args_list: list[str] | None = None) -> None:
         top_segments=args.top_segments,
         video=args.video,
         video_root=args.video_root,
-        reencode=args.reencode,
+        cut_mode=args.cut_mode,
+        max_keyframe_gap=args.max_keyframe_gap,
+        video_codec=args.video_codec,
+        no_audio=args.no_audio,
         jobs=args.jobs,
         no_overlap=args.no_overlap,
         skip_existing=args.skip_existing,
         ffmpeg=args.ffmpeg,
+        ffprobe=args.ffprobe,
     )
 
 
