@@ -12,7 +12,6 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=8G
 #SBATCH --time=06:00:00              # unmeasured guess; set from sacct after the first run
-#SBATCH --signal=B:USR1@600          # 10 min before the time limit: copy clips back
 #SBATCH --output=ego4d-extract-%j.out
 
 set -euo pipefail
@@ -36,25 +35,11 @@ else
 fi
 echo "=== node: $(hostname)  job: $SLURM_JOB_ID  fold: $FOLD  encoder: $CODEC ==="
 
-# Write clips to fast local scratch, copy them to /data at the end (or on timeout).
-OUT="$SCRATCH/clips$FOLD""
-copy_back() {
-    mkdir -p "$FINAL_OUT"
-    rsync -a "$OUT/" "$FINAL_OUT/"
-    echo "=== copied clips to $FINAL_OUT ==="
-}
-trap 'copy_back; exit 1' USR1
-
-# Resume: bring back clips from an earlier run of this fold and skip them.
-mkdir -p "$OUT"
-[[ -d "$FINAL_OUT" ]] && rsync -a "$FINAL_OUT/" "$OUT/"
-
+# Clips are written straight to /data. Each clip is renamed into place only when complete,
+# so if the job times out, resubmitting resumes where it stopped (--skip-existing).
 python -m ego_curation.extract "$SEGMENTS_DIR"/*.csv \
-    --output "$OUT" \
+    --output "$FINAL_OUT" \
     --video-codec "$CODEC" \
     --no-audio \
     --jobs "$JOBS" \
-    --skip-existing &
-wait $!          # wait in the background so the USR1 trap can fire during the run
-
-copy_back
+    --skip-existing

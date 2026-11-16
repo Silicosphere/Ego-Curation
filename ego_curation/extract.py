@@ -295,19 +295,30 @@ def extract(
             if skip_existing and out_file.exists():
                 n_csv_ok += 1
                 continue
-            cmds.append(_ffmpeg_cmd(ffmpeg, video_path, start, duration, out_file,
-                                    reencode, video_codec, no_audio, quality, max_height))
+            # Write under a temporary name and rename when complete, so a clip cut off by a
+            # killed job is never mistaken for a finished one by --skip-existing.
+            tmp_file = out_file.with_name(out_file.stem + ".part.mp4")
+            cmds.append((_ffmpeg_cmd(ffmpeg, video_path, start, duration, tmp_file,
+                                     reencode, video_codec, no_audio, quality, max_height),
+                         tmp_file, out_file))
+
+        def run(job: tuple[list[str], Path, Path]) -> tuple[subprocess.CompletedProcess, Path]:
+            cmd, tmp_file, out_file = job
+            proc = subprocess.run(cmd, capture_output=True, text=True)
+            if proc.returncode == 0:
+                tmp_file.replace(out_file)
+            else:
+                tmp_file.unlink(missing_ok=True)
+            return proc, out_file
 
         with ThreadPoolExecutor(max_workers=jobs) as pool:
-            results = pool.map(
-                lambda cmd: subprocess.run(cmd, capture_output=True, text=True), cmds)
-            for proc in tqdm(results, desc=video_path.stem[:16], total=len(cmds)):
+            results = pool.map(run, cmds)
+            for proc, out_file in tqdm(results, desc=video_path.stem[:16], total=len(cmds)):
                 if proc.returncode == 0:
                     n_csv_ok += 1
                 else:
                     n_failed += 1
-                    tqdm.write(f"ffmpeg failed for {Path(proc.args[-1]).name}:\n"
-                               f"{proc.stderr.strip()}")
+                    tqdm.write(f"ffmpeg failed for {out_file.name}:\n{proc.stderr.strip()}")
 
         n_ok += n_csv_ok
         print(f"Extracted {n_csv_ok}/{len(df)} clips to {csv_out_dir}")
