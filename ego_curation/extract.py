@@ -88,6 +88,20 @@ def build_parser() -> argparse.ArgumentParser:
         "if your ffmpeg build supports it)",
     )
     parser.add_argument(
+        "--quality",
+        type=_positive_int,
+        default=23,
+        help="Re-encoding quality: CRF for libx264, CQ for NVENC. Lower = better quality "
+        "and bigger files; 18 is near-lossless, 23 (default) is x264's standard, 28 is small",
+    )
+    parser.add_argument(
+        "--max-height",
+        type=_positive_int,
+        default=None,
+        help="When re-encoding, shrink taller videos to this height in pixels, keeping the "
+        "aspect ratio (e.g. 480). Default: keep the original resolution",
+    )
+    parser.add_argument(
         "--no-audio",
         action="store_true",
         help="Drop the audio stream from the clips",
@@ -188,16 +202,23 @@ def _use_reencode(cut_mode: str, ffprobe: str, video_path: Path, max_gap: float)
 
 def _ffmpeg_cmd(
     ffmpeg: str, video_path: Path, start: float, duration: float, out_file: Path,
-    reencode: bool, video_codec: str, no_audio: bool,
+    reencode: bool, video_codec: str, no_audio: bool, quality: int = 23,
+    max_height: int | None = None,
 ) -> list[str]:
     # -ss before -i seeks on input, so ffmpeg never decodes from the start of the video.
     # With re-encoding this is still frame-accurate (FFmpeg >= 2.1).
     cmd = [ffmpeg, "-y", "-loglevel", "error", "-ss", f"{start:.3f}", "-i", str(video_path),
            "-t", f"{duration:.3f}"]
     if reencode:
+        if max_height:
+            # Only ever shrink; -2 keeps the width even, as H.264 requires.
+            cmd += ["-vf", f"scale=-2:'min(ih,{max_height})'"]
         cmd += ["-c:v", video_codec]
         if video_codec == "libx264":
-            cmd += ["-preset", "veryfast", "-crf", "18"]
+            cmd += ["-preset", "veryfast", "-crf", str(quality)]
+        elif "nvenc" in video_codec:
+            # Constant-quality mode, roughly matching libx264 at the same CRF.
+            cmd += ["-preset", "p4", "-rc", "vbr", "-cq", str(quality), "-b:v", "0"]
         cmd += ["-an"] if no_audio else ["-c:a", "aac"]
     else:
         cmd += ["-c", "copy", "-avoid_negative_ts", "make_zero"]
@@ -216,6 +237,8 @@ def extract(
     max_keyframe_gap: float = 0.5,
     video_codec: str = "libx264",
     no_audio: bool = False,
+    quality: int = 23,
+    max_height: int | None = None,
     jobs: int = 1,
     no_overlap: bool = False,
     skip_existing: bool = False,
@@ -273,7 +296,7 @@ def extract(
                 n_csv_ok += 1
                 continue
             cmds.append(_ffmpeg_cmd(ffmpeg, video_path, start, duration, out_file,
-                                    reencode, video_codec, no_audio))
+                                    reencode, video_codec, no_audio, quality, max_height))
 
         with ThreadPoolExecutor(max_workers=jobs) as pool:
             results = pool.map(
@@ -305,6 +328,8 @@ def main(args_list: list[str] | None = None) -> None:
         max_keyframe_gap=args.max_keyframe_gap,
         video_codec=args.video_codec,
         no_audio=args.no_audio,
+        quality=args.quality,
+        max_height=args.max_height,
         jobs=args.jobs,
         no_overlap=args.no_overlap,
         skip_existing=args.skip_existing,
