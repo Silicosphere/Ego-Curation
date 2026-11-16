@@ -5,7 +5,7 @@ file name (also the plot title), with the window centre time on the x axis and t
 score on the y axis. Windows missing from the CSV (e.g. when it was written
 with --top-segments) leave a gap in the line instead of being bridged.
 
-    python visualize_results.py segments/*.csv --out-dir plots
+    python scripts/analysis/plot_surprise_curves.py segments/*.csv --out-dir plots
 """
 import argparse
 from pathlib import Path

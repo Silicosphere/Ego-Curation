@@ -99,13 +99,15 @@ The pipeline runs on the GPU cluster. A run takes a long time, so start it insid
    srun --gres=gpu:rtx5090 --cpus-per-task=8 --mem=32G --time=12:00:00 --pty bash
    ```
 
-3. On the GPU node, run the pipeline script from the repository root:
+3. On the GPU node, score one fold from the repository root:
 
    ```bash
-   ./run.sh
+   ./scripts/score/score_fold.sh 1
    ```
 
-   [run.sh](run.sh) loads the FFmpeg module that `torchcodec` needs (`module load FFmpeg/7.0.2-GCCcore-13.3.0`), exports `TORCH_HOME` so the checkpoints are stored under `/data` rather than your home directory, activates the virtual environment and calls `main.py`.
+   Every script in `scripts/` sources [scripts/env.sh](scripts/env.sh) first. It loads the FFmpeg module that `torchcodec` needs (`module load FFmpeg/7.0.2-GCCcore-13.3.0`), exports `TORCH_HOME` and `HF_HOME` so downloads go to `/data` rather than your home directory, and activates the virtual environment. Export `DATA_ROOT` or `VENV` beforehand to use other locations. All scripts must be run or submitted from the repository root.
+
+   To score folds 1–5 on five nodes at once, submit a batch job instead: `sbatch scripts/score/score_all_folds.sh`.
 
 To leave the run in the background, detach with `Ctrl-b` then `d`. Reattach later with `tmux attach -t ego`.
 
@@ -113,6 +115,12 @@ To leave the run in the background, detach with `Ctrl-b` then `d`. Reattach late
 
 ```bash
 python3 -m ego_curation.extract segments/*.csv --top-segments 20 --output clips/
+```
+
+On the cluster, cut a whole fold with GPU encoding (run `sbatch scripts/extract/setup_nvenc.sh` once first):
+
+```bash
+sbatch scripts/extract/extract_clips.sh 1
 ```
 
 ## Choosing the parameters
@@ -197,8 +205,16 @@ Ego-Curation/
 │   ├── extract.py               # segment extraction
 │   ├── model.py                 # model definitions
 │   ├── pipeline.py              # pipeline orchestration
-│   └── sampling.py              # sampling logic
-└── (runtime dirs: segments/, clips/, not tracked)
+│   ├── sampling.py              # sampling logic
+│   └── visualization.py         # PCA view of the features of one window
+├── scripts/                     # cluster jobs; run from the repository root
+│   ├── env.sh                   # shared environment (FFmpeg module, TORCH_HOME, venv)
+│   ├── score/                   # score_fold.sh, score_all_folds.sh
+│   ├── extract/                 # setup_nvenc.sh, extract_clips.sh
+│   └── analysis/                # pca_window.sh, plot_surprise_curves.py
+├── docs/                        # design notes and reviews
+├── runs_results/                # outputs and logs of past cluster runs
+└── (runtime dirs: segments*/, clips/, not tracked)
 ```
 
 ## License

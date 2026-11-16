@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 #
-# PARALLEL RUN
+# PARALLEL RUN: score folds 1-5 on 5 nodes at once. Submit from the repository root:
+#
+#   sbatch scripts/score/score_all_folds.sh
 #
 # Measured from profiling job 1109 (fold 1, 2-hour run):
 #   MaxRSS = 15.6 GiB  → --mem=20G (15.6 GiB + 20% headroom)
@@ -22,11 +24,8 @@
 
 set -euo pipefail
 
-# ── environment (runs on the head node of the allocation) ────────────────────
-module load FFmpeg/7.0.2-GCCcore-13.3.0
-
-export HF_HOME="/data/asem.a.abdelaziz/gp-2027a/huggingface_downloads"
-export TORCH_HOME="/data/asem.a.abdelaziz/gp-2027a/torch_downloads"
+# ── environment (checked on the head node; each fold sources it again) ───────
+source scripts/env.sh
 
 echo "=== job $SLURM_JOB_ID allocated nodes: $SLURM_JOB_NODELIST ==="
 echo "=== started: $(date -Iseconds) ==="
@@ -55,13 +54,10 @@ for i in {0..4}; do
         echo \"[\$(hostname)] fold $FOLD started at \$(date -Iseconds)\"
         echo \"[\$(hostname)] GPU: \$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader)\"
 
-        module load FFmpeg/7.0.2-GCCcore-13.3.0
-        export HF_HOME=\"$HF_HOME\"
-        export TORCH_HOME=\"$TORCH_HOME\"
-        source ../myenv/bin/activate
+        source scripts/env.sh
 
         python3 main.py \
-          /data/asem.a.abdelaziz/gp-2027a/ego4d_data/v2/full_scale/fold${FOLD}/*.mp4 \
+          \"\$EGO4D_DIR/fold${FOLD}\"/*.mp4 \
           --model-size giant \
           --sample-fps 4 \
           --context-frames 16 \

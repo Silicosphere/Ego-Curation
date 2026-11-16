@@ -1,42 +1,42 @@
 #!/usr/bin/env bash
 #
 # Cut the scored segments of one fold into clips, re-encoding on the GPU (NVENC).
-# Run setup_nvenc.sh once first. Submit from the Ego-Curation folder:
+# Run setup_nvenc.sh once first. Submit from the repository root:
 #
-# Usage: sbatch extract_clips.sh <fold>        e.g. sbatch extract_clips.sh 1
-#        ALLOW_CPU=1 sbatch extract_clips.sh 1  (encode on the CPU if NVENC is not set up)
+# Usage: sbatch scripts/extract/extract_clips.sh <fold>        e.g. ... extract_clips.sh 1
+#        ALLOW_CPU=1 sbatch scripts/extract/extract_clips.sh 1  (encode on the CPU if NVENC
+#        is not set up)
+#        SEGMENTS_DIR=<dir> sbatch ...  (cut the CSVs of another run; default: run_1184)
 #
 # Resources (fold 1: 200 videos, ~55% larger than 1080p, up to 3413x1920):
-#   time: ~160 s/video measured on a 3-video test; larger videos decode slower
-#   mem:  ~750 MB per ffmpeg measured; 4 run at once on the same video, more for large frames
+#   time: 2.1 s/clip measured on a 2560x1920 video (worst common case), CPU-bound on decoding
+#   mem:  ~800 MB per ffmpeg measured on 2560x1920; 4 at once = ~3.2 GB
+#   disk: ~3 MB per clip at 540 px
 #
 #SBATCH --job-name=ego4d-extract
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:rtx4060ti:1       # NVENC only; any card works, so don't tie up the 5090
-#SBATCH --cpus-per-task=6            # decoding is on the CPU: ~2.25 busy at 1080p, more above
-#SBATCH --mem=12G                    # 4 ffmpeg processes on frames up to 3413x1920
-#SBATCH --time=18:00:00              # ~11-16 h expected for 200 videos; resubmit resumes
+#SBATCH --cpus-per-task=8            # decoding is on the CPU: 5 of 6 were busy at 2560x1920
+#SBATCH --mem=8G                     # 3.2 GB measured at 2560x1920; margin for 3413x1920
+#SBATCH --time=18:00:00              # clips x 2.1 s is the worst case; resubmit resumes
 #SBATCH --output=ego4d-extract-%j.out
 
 set -euo pipefail
 
-FOLD="${1:?usage: sbatch extract_clips.sh <fold>}"
+FOLD="${1:?usage: sbatch scripts/extract/extract_clips.sh <fold>}"
 JOBS=4               # parallel ffmpeg processes (GeForce cards limit concurrent NVENC sessions)
-SEGMENTS_DIR="/data/asem.a.abdelaziz/gp-2027a/Ego-Curation/runs_results/run_1184/segments$FOLD"
-FINAL_OUT="/data/asem.a.abdelaziz/gp-2027a/ego4d_clips/clips$FOLD"
 
-# Fail early, with a clear message, instead of hours into the run.
-if [[ ! -d ego_curation ]]; then
-    echo "ERROR: submit from the Ego-Curation folder (current: $PWD)" >&2; exit 1
-fi
+# Fail early, with a clear message, instead of hours into the run (env.sh checks the folder).
+source scripts/env.sh
+export PYTHONUNBUFFERED=1    # write progress lines to the log immediately, not in chunks
+
+SEGMENTS_DIR="${SEGMENTS_DIR:-runs_results/run_1184/segments$FOLD}"
+FINAL_OUT="$DATA_ROOT/ego4d_clips/clips$FOLD"
 shopt -s nullglob
 CSVS=("$SEGMENTS_DIR"/*.csv)
 if (( ${#CSVS[@]} == 0 )); then
     echo "ERROR: no segment CSVs in $SEGMENTS_DIR" >&2; exit 1
 fi
-
-module load FFmpeg/7.0.2-GCCcore-13.3.0
-source ../myenv/bin/activate
 
 # Use the GPU encoder if setup_nvenc.sh installed the library for this node's driver.
 # CPU encoding of a whole fold is several times slower and would not fit the time limit,

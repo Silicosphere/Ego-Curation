@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# Submit from the repository root: sbatch scripts/extract/setup_nvenc.sh
+#
 # One-time setup: install the NVIDIA video-encoder library (libnvidia-encode) in your home
 # directory, so ffmpeg's h264_nvenc encoder can use the GPU. No root needed.
 #
