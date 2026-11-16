@@ -95,11 +95,12 @@ def build_parser() -> argparse.ArgumentParser:
         "and bigger files; 18 is near-lossless, 23 (default) is x264's standard, 28 is small",
     )
     parser.add_argument(
-        "--max-height",
+        "--max-short-side",
         type=_positive_int,
         default=None,
-        help="When re-encoding, shrink taller videos to this height in pixels, keeping the "
-        "aspect ratio (e.g. 480). Default: keep the original resolution",
+        help="Shrink each clip so its shorter side is at most this many pixels, keeping the "
+        "aspect ratio (e.g. 480 for 384 px training). Implies re-encoding. "
+        "Default: keep the original resolution",
     )
     parser.add_argument(
         "--no-audio",
@@ -122,6 +123,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--skip-existing",
         action="store_true",
         help="Do not re-extract clips whose output file already exists",
+    )
+    parser.add_argument(
+        "--delete-source",
+        action="store_true",
+        help="DELETE each source video once all of its clips were extracted successfully "
+        "(irreversible; videos with any failed clip are kept). Only use with a backup",
     )
     parser.add_argument(
         "--ffmpeg", default="ffmpeg", help="ffmpeg executable path (default: ffmpeg)"
@@ -203,16 +210,18 @@ def _use_reencode(cut_mode: str, ffprobe: str, video_path: Path, max_gap: float)
 def _ffmpeg_cmd(
     ffmpeg: str, video_path: Path, start: float, duration: float, out_file: Path,
     reencode: bool, video_codec: str, no_audio: bool, quality: int = 23,
-    max_height: int | None = None,
+    max_short_side: int | None = None,
 ) -> list[str]:
     # -ss before -i seeks on input, so ffmpeg never decodes from the start of the video.
     # With re-encoding this is still frame-accurate (FFmpeg >= 2.1).
     cmd = [ffmpeg, "-y", "-loglevel", "error", "-ss", f"{start:.3f}", "-i", str(video_path),
            "-t", f"{duration:.3f}"]
     if reencode:
-        if max_height:
-            # Only ever shrink; -2 keeps the width even, as H.264 requires.
-            cmd += ["-vf", f"scale=-2:'min(ih,{max_height})'"]
+        if max_short_side:
+            # Shrink the shorter side (height for landscape, width for portrait), never
+            # enlarge; -2 keeps the other side even, as H.264 requires.
+            s = max_short_side
+            cmd += ["-vf", f"scale='if(gte(iw,ih),-2,min(iw,{s}))':'if(gte(iw,ih),min(ih,{s}),-2)'"]
         cmd += ["-c:v", video_codec]
         if video_codec == "libx264":
             cmd += ["-preset", "veryfast", "-crf", str(quality)]
@@ -238,16 +247,21 @@ def extract(
     video_codec: str = "libx264",
     no_audio: bool = False,
     quality: int = 23,
-    max_height: int | None = None,
+    max_short_side: int | None = None,
     jobs: int = 1,
     no_overlap: bool = False,
     skip_existing: bool = False,
+    delete_source: bool = False,
     ffmpeg: str = "ffmpeg",
     ffprobe: str = "ffprobe",
-) -> None:
+) -> int:
+    """Extract clips; returns the number of failed clips."""
     if shutil.which(ffmpeg) is None:
         raise SystemExit(
             f"ffmpeg not found on PATH ('{ffmpeg}'). Install it or pass --ffmpeg.")
+    if max_short_side and cut_mode == "copy":
+        raise SystemExit("--max-short-side needs re-encoding; it cannot be used with "
+                         "--cut-mode copy.")
     if video and len(csv_paths) > 1:
         raise SystemExit(
             "--video can only be used with a single CSV; use --video-root for several.")
@@ -255,7 +269,7 @@ def extract(
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    n_ok = n_failed = n_skipped_csv = 0
+    n_ok = n_failed = n_skipped_csv = n_deleted = 0
     for csv_path in csv_paths:
         csv_path = Path(csv_path)
         if csv_path.suffix.lower() != ".csv":
@@ -281,7 +295,9 @@ def extract(
             n_skipped_csv += 1
             continue
 
-        reencode = _use_reencode(cut_mode, ffprobe, video_path, max_keyframe_gap)
+        # Resizing always needs re-encoding; otherwise pick per video.
+        reencode = bool(max_short_side) or _use_reencode(
+            cut_mode, ffprobe, video_path, max_keyframe_gap)
         csv_out_dir = out_dir / video_path.stem
         csv_out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -299,16 +315,23 @@ def extract(
             # killed job is never mistaken for a finished one by --skip-existing.
             tmp_file = out_file.with_name(out_file.stem + ".part.mp4")
             cmds.append((_ffmpeg_cmd(ffmpeg, video_path, start, duration, tmp_file,
-                                     reencode, video_codec, no_audio, quality, max_height),
+                                     reencode, video_codec, no_audio, quality,
+                                     max_short_side),
                          tmp_file, out_file))
 
         def run(job: tuple[list[str], Path, Path]) -> tuple[subprocess.CompletedProcess, Path]:
             cmd, tmp_file, out_file = job
             proc = subprocess.run(cmd, capture_output=True, text=True)
-            if proc.returncode == 0:
-                tmp_file.replace(out_file)
-            else:
-                tmp_file.unlink(missing_ok=True)
+            try:
+                if proc.returncode == 0:
+                    tmp_file.replace(out_file)
+                else:
+                    tmp_file.unlink(missing_ok=True)
+            except OSError as e:
+                # Count a clip that could not be renamed or cleaned up as failed,
+                # instead of stopping the whole run.
+                proc.returncode = proc.returncode or 1
+                proc.stderr = f"{proc.stderr}\n{e}".strip()
             return proc, out_file
 
         with ThreadPoolExecutor(max_workers=jobs) as pool:
@@ -323,13 +346,24 @@ def extract(
         n_ok += n_csv_ok
         print(f"Extracted {n_csv_ok}/{len(df)} clips to {csv_out_dir}")
 
+        if delete_source:
+            if n_csv_ok == len(df):
+                video_path.unlink()
+                n_deleted += 1
+                print(f"  deleted source video {video_path}")
+            else:
+                print(f"  kept source video {video_path}: "
+                      f"{len(df) - n_csv_ok} clip(s) failed")
+
     print(f"\nDone: {n_ok} clips extracted, {n_failed} failed, "
-          f"{n_skipped_csv} CSV(s) skipped.")
+          f"{n_skipped_csv} CSV(s) skipped"
+          + (f", {n_deleted} source video(s) deleted." if delete_source else "."))
+    return n_failed
 
 
 def main(args_list: list[str] | None = None) -> None:
     args = build_parser().parse_args(args_list)
-    extract(
+    n_failed = extract(
         csv_paths=args.csv,
         output_dir=args.output,
         top_segments=args.top_segments,
@@ -340,13 +374,16 @@ def main(args_list: list[str] | None = None) -> None:
         video_codec=args.video_codec,
         no_audio=args.no_audio,
         quality=args.quality,
-        max_height=args.max_height,
+        max_short_side=args.max_short_side,
         jobs=args.jobs,
         no_overlap=args.no_overlap,
         skip_existing=args.skip_existing,
+        delete_source=args.delete_source,
         ffmpeg=args.ffmpeg,
         ffprobe=args.ffprobe,
     )
+    if n_failed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
