@@ -15,6 +15,7 @@ dependencies = [
     "pandas",
     "tqdm",
     "numpy",
+    "hp5",
 ]
 
 [project.scripts]

@@ -9,12 +9,14 @@ Output layout:
                                   attrs: rank, start_sec
 
 The clips are stored byte for byte (no re-encoding, no compression: mp4 is already compressed).
-The file is written as <name>.h5.part and renamed only after every clip has been read back
-and checked, so a killed job never leaves a half-written .h5 behind. With --delete, each
-video folder is removed only after that check.
+With --workdir (e.g. $SCRATCH, the node's local disk), the file is built and checked there,
+then copied to the output folder as one file and checked again. This avoids heavy writes on
+the network disk, which fail when the folder is at its file-count quota. The final file only
+appears under its real name after every check passed, and a failed run removes its partial
+files. With --delete, each video folder is removed only after all checks.
 
 Usage (from the repository root):
-    python scripts/extract/pack_hdf5.py /data/.../ego4d_clips/clips1 [--delete]
+    python scripts/extract/pack_hdf5.py /data/.../ego4d_clips/clips1 --workdir $SCRATCH [--delete]
 
 Read a clip back:
     with h5py.File("clips1.h5") as f:
@@ -34,14 +36,49 @@ from tqdm.auto import tqdm
 CLIP_NAME = re.compile(r"_seg(\d+)_(\d+(?:\.\d+)?)s$")
 
 
-def pack(clips_dir: Path, out_file: Path, delete: bool) -> None:
+def _file_sha1(path: Path) -> str:
+    digest = hashlib.sha1()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(64 << 20), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def pack(clips_dir: Path, out_file: Path, delete: bool, workdir: Path | None = None) -> None:
     video_dirs = sorted(d for d in clips_dir.iterdir() if d.is_dir())
     if not video_dirs:
         raise SystemExit(f"No video folders in {clips_dir}")
     if out_file.exists():
         raise SystemExit(f"{out_file} already exists; move or delete it first.")
 
-    tmp_file = out_file.with_name(out_file.name + ".part")
+    out_part = out_file.with_name(out_file.name + ".part")
+    tmp_file = (workdir / out_part.name) if workdir else out_part
+    try:
+        n_clips = _write_and_verify(video_dirs, clips_dir, tmp_file)
+        if workdir:
+            print(f"Copying {tmp_file} to {out_part} ...")
+            shutil.copyfile(tmp_file, out_part)
+            if _file_sha1(out_part) != _file_sha1(tmp_file):
+                raise SystemExit(f"The copy {out_part} does not match {tmp_file}; "
+                                 f"nothing deleted.")
+            tmp_file.unlink()
+        out_part.replace(out_file)
+    finally:
+        # Remove partial files from a failed run, so they don't count against the quota.
+        for leftover in {tmp_file, out_part}:
+            leftover.unlink(missing_ok=True)
+
+    size_gb = out_file.stat().st_size / 1e9
+    print(f"Packed and verified {n_clips} clips from {len(video_dirs)} videos "
+          f"into {out_file} ({size_gb:.1f} GB)")
+
+    if delete:
+        for video_dir in video_dirs:
+            shutil.rmtree(video_dir)
+        print(f"Deleted the {len(video_dirs)} packed video folders from {clips_dir}")
+
+
+def _write_and_verify(video_dirs: list[Path], clips_dir: Path, tmp_file: Path) -> int:
     hashes = {}
     n_clips = 0
     with h5py.File(tmp_file, "w") as h5:
@@ -65,17 +102,8 @@ def pack(clips_dir: Path, out_file: Path, delete: bool) -> None:
     with h5py.File(tmp_file, "r") as h5:
         for key, digest in tqdm(hashes.items(), desc="Verifying"):
             if hashlib.sha1(h5[key][()].tobytes()).hexdigest() != digest:
-                raise SystemExit(f"Verification failed for {key}; {tmp_file} kept, "
-                                 f"nothing deleted.")
-    tmp_file.replace(out_file)
-    size_gb = out_file.stat().st_size / 1e9
-    print(f"Packed and verified {n_clips} clips from {len(video_dirs)} videos "
-          f"into {out_file} ({size_gb:.1f} GB)")
-
-    if delete:
-        for video_dir in video_dirs:
-            shutil.rmtree(video_dir)
-        print(f"Deleted the {len(video_dirs)} packed video folders from {clips_dir}")
+                raise SystemExit(f"Verification failed for {key}; nothing deleted.")
+    return n_clips
 
 
 def main() -> None:
@@ -83,11 +111,14 @@ def main() -> None:
     parser.add_argument("clips_dir", type=Path, help="Folder of clips, e.g. ego4d_clips/clips1")
     parser.add_argument("--output", type=Path, default=None,
                         help="Output .h5 file (default: <clips_dir>.h5 next to the folder)")
+    parser.add_argument("--workdir", type=Path, default=None,
+                        help="Build and check the file here first (e.g. $SCRATCH), then "
+                        "copy it to the output folder")
     parser.add_argument("--delete", action="store_true",
                         help="Delete the video folders after the .h5 file is verified")
     args = parser.parse_args()
     clips_dir = args.clips_dir.resolve()
-    pack(clips_dir, args.output or clips_dir.with_suffix(".h5"), args.delete)
+    pack(clips_dir, args.output or clips_dir.with_suffix(".h5"), args.delete, args.workdir)
 
 
 if __name__ == "__main__":
