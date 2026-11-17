@@ -74,7 +74,7 @@ python -m ego_curation.extract "${CSVS[@]}" \
     --no-audio \
     --jobs "$JOBS" \
     --skip-existing \
-    --delete-source || status=$?
+    # --delete-source || status=$?
 
 echo "=== finished: $(date -Iseconds)  exit status: $status ==="
 du -sh "$FINAL_OUT"
